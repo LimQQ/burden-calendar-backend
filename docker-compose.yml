@@ -1,0 +1,44 @@
+# 로컬 전체 실행: docker compose up --build
+# 로컬 개발용 계정(burden/burden)이다. 배포 환경에서는 쓰지 않는다.
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: burden
+      POSTGRES_PASSWORD: burden
+      POSTGRES_DB: burden
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U burden -d burden"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      target: build
+    command: ["npx", "prisma", "migrate", "deploy"]
+    environment:
+      DATABASE_URL: postgresql://burden:burden@db:5432/burden?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build: .
+    environment:
+      PORT: 3000
+      LOG_LEVEL: info
+      DATABASE_URL: postgresql://burden:burden@db:5432/burden?schema=public
+    ports:
+      - "3000:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  db-data:

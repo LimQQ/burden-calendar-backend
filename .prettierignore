@@ -1,0 +1,7 @@
+dist/
+coverage/
+src/generated/
+prisma/migrations/
+package-lock.json
+# 설계 문서는 손으로 쓴 형식(표 정렬 등)을 그대로 둔다.
+*.md

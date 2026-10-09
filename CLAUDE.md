@@ -28,11 +28,17 @@
 - 배포 DB는 미정이다. 정해지기 전까지 DB 접근은 Prisma 계층에만 둔다.
 
 ## 명령어
-Phase 0에서 실제 명령어를 만든 뒤 이 칸을 갱신한다.
-- 개발 서버: (미정)
-- 테스트: (미정)
-- 린트: (미정)
-- 로컬 전체 실행: (미정, docker compose 예정)
+- 처음 설정: `npm install` → `.env.example`을 `.env`로 복사 → `npm run db:generate`
+- 개발 서버: `npm run dev` (DB가 필요하면 먼저 `docker compose up -d db`)
+- 테스트: `npm test`
+- 린트: `npm run lint` (자동 수정은 `npm run format`), 타입 검사: `npm run typecheck`
+- DB 스키마 변경: `prisma/schema.prisma`를 고친 뒤 `npm run db:migrate` (마이그레이션 생성·적용, Client 재생성)
+- 로컬 전체 실행: `docker compose up --build` (db → migrate → api)
+
+## 버전 메모
+- TypeScript는 6.0을 쓴다. 7.0은 typescript-eslint가 아직 지원하지 않는다.
+- Prisma는 7.10을 쓴다. Client는 `src/generated/prisma`에 생성되고(커밋하지 않음) `../generated/prisma/client.js`에서 가져온다. DB 연결은 `@prisma/adapter-pg`, DB 주소는 `prisma.config.ts`에서 읽는다.
+- npm 11은 설치 스크립트를 `package.json`의 `allowScripts`에 적힌 패키지만 실행한다. prisma·esbuild 버전을 올리면 `npm install-scripts approve`로 다시 허용한다.
 
 ## 폴더 구조 (목표)
 ```

@@ -1,0 +1,180 @@
+// DB 테이블 초안: docs/api-draft.md 'DB 테이블 초안'과 맞춘다.
+// 데이터베이스 연결 주소는 prisma.config.ts에서 읽는다.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EventType {
+  class
+  exam
+  assignment
+  presentation
+  meeting
+  parttime
+  social
+  exercise
+  rest
+  other
+}
+
+/// 값을 정한 주체: 규칙(rule) 또는 사용자(user)
+enum ValueSource {
+  rule
+  user
+}
+
+enum Confidence {
+  high
+  medium
+  low
+}
+
+enum WeightSource {
+  initial
+  learned
+}
+
+enum ScoreModel {
+  burden
+  rule
+}
+
+model User {
+  id        String   @id @default(cuid())
+  googleSub String?  @unique
+  email     String?
+  name      String?
+  isDemo    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  googleCredential GoogleCredential?
+  profile          Profile?
+  activityWeights  ActivityWeight[]
+  categories       Category[]
+  events           Event[]
+  checkIns         CheckIn[]
+  dailyScores      DailyScore[]
+  calibration      Calibration?
+}
+
+/// refresh token은 AES-256-GCM으로 암호화해 저장한다.
+model GoogleCredential {
+  userId          String   @id
+  refreshTokenEnc String
+  scopes          String
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// 시작 설정
+model Profile {
+  userId             String   @id
+  activeStart        String   @default("09:00")
+  activeEnd          String   @default("22:00")
+  restDays           Int[]    @default([])
+  dailyCapacityHours Float    @default(8)
+  lifeType           String?
+  updatedAt          DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ActivityWeight {
+  userId String
+  type   EventType
+  weight Float
+  source WeightSource
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, type])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  color     String
+  createdAt DateTime @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events Event[]
+
+  @@unique([userId, name])
+}
+
+/// 데모 사용자의 일정은 googleEventId가 null이다.
+model Event {
+  id             String      @id @default(cuid())
+  userId         String
+  googleEventId  String?
+  calendarId     String?
+  title          String
+  categoryId     String?
+  startAt        DateTime
+  endAt          DateTime
+  allDay         Boolean
+  location       String?
+  type           EventType
+  typeSource     ValueSource
+  typeConfidence Confidence
+  isDeadline     Boolean     @default(false)
+  deadlineSource ValueSource
+  important      Boolean     @default(false)
+  completedAt    DateTime?
+  prepHours      Float?
+  updatedAt      DateTime    @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, googleEventId])
+  @@index([userId, startAt])
+}
+
+model CheckIn {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  level     Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+/// 부담도 계산 결과 캐시. 일정이 바뀌면 영향받는 날짜를 다시 계산한다.
+model DailyScore {
+  userId       String
+  date         DateTime   @db.Date
+  model        ScoreModel
+  total        Float
+  load         Float
+  recovery     Float
+  level        Int
+  breakdown    Json
+  modelVersion String
+  computedAt   DateTime   @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, date, model])
+}
+
+/// 개인 보정 상태
+model Calibration {
+  userId    String   @id
+  alpha     Float    @default(1)
+  n         Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
