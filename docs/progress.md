@@ -5,9 +5,9 @@
 작업을 마치거나 팀 결정이 생길 때마다 이 문서를 고친다. 끝난 일은 체크하고 '진행 기록'에 날짜와 함께 남긴다.
 
 ## 지금 상태
-- 단계: Phase 0 코드 완료 (브랜치 `phase0/skeleton`). docker compose 실행 확인과 PR이 남음
+- 단계: Phase 0 완료, PR #1(`phase0/skeleton` → main) 머지 대기
 - 코드 저장소: `C:\Users\561gu\Desktop\burden-calendar-backend`. 설계 문서(`CLAUDE.md`, `docs/`)도 여기에 둔다. GitHub는 private 저장소
-- 다음 할 일: Docker Desktop을 켜고 `docker compose up --build` 확인 → GitHub에 push하고 PR. v1 문서는 프론트 팀과 따로 맞춘다
+- 다음 할 일: PR #1 확인·머지 → Phase 1 준비(Google Cloud OAuth 설정, 프론트 팀과 v1 문서·구글 로그인 방식 맞추기)
 - 일정: 개발 중심 기간 11/2~12/6, User Study 12/7·12/9
 
 ## 해야 할 일
@@ -30,8 +30,9 @@
 - [x] DB 스키마(api-draft 표 9개)와 첫 마이그레이션 `20261009000000_init` (10/9)
 - [x] `GET /health`, 오류 응답 형식(404·400·500), `.env.example`, README (10/9)
 - [x] GitHub Actions: lint + 타입 검사 + 테스트 + 빌드 (10/9)
-- [ ] `docker compose up --build`로 db·migrate·api 실행 확인 (Docker Desktop 실행 필요)
-- [ ] GitHub private 저장소 만들고 push, PR 올리기, 첫 CI 통과 확인
+- [x] `docker compose up --build`로 db·migrate·api 실행 확인: 테이블 9개 생성, `/health` 응답, 스키마와 마이그레이션 차이 없음 (10/9)
+- [x] GitHub private 저장소(`LimQQ/burden-calendar-backend`) 만들고 PR #1 올림, 첫 CI 통과 (10/9)
+- [ ] PR #1 머지
 
 ### Phase 1 구글 로그인 + 캘린더 기본 기능
 - [ ] `POST /v1/auth/google`, 자체 JWT, refresh token 암호화 저장
@@ -87,3 +88,4 @@
 - 10/8: 앱 구상도를 반영해 설계 문서를 v1로 고침. 문서를 `지능HCI/조별과제` 폴더로 모으고 이 문서를 만듦
 - 10/9: 바탕화면에 코드 저장소 폴더 `burden-calendar-backend`를 만들고 설계 문서를 옮김. Node.js LTS·GitHub CLI 설치. Docker는 winget 패키지 이름을 잘못 안내해(`Docker.Docker`) 설치 실패, `Docker.DockerDesktop`으로 다시 설치해 완료. 개발 도구 준비 끝(Node 24.20, npm 11.19, Docker 29.8, gh 2.102)
 - 10/9: git 시작(main에 설계 문서 첫 커밋). `phase0/skeleton` 브랜치에서 Phase 0 뼈대 작성. lint·타입 검사·테스트 6개·빌드 통과, `npm run dev`로 `/health` 응답 확인. 첫 마이그레이션은 Docker가 꺼져 있어 `prisma migrate diff`로 스키마에서 만듦
+- 10/9: GitHub private 저장소 `LimQQ/burden-calendar-backend` 만들고 PR #1 올림(CI 통과). `docker compose up --build`로 db·migrate·api 실행 확인. Phase 0 완료
