@@ -112,3 +112,4 @@ PR C 일정·카테고리 API (브랜치 `phase1/events`, PR B 위에 쌓음)
 - 10/10: PR #1 머지는 자동 모드 안전장치에 막혀 직접 머지하기로 함. Phase 1 계획 승인. PR A(제목 규칙·종류 분류) 작성, 테스트 32개 통과
 - 10/10: PR B(로그인) 작성. 단위 테스트 49개, 통합 테스트 10개 통과. `npm run dev`로 데모 로그인 → `/v1/me`, 구글 설정 없을 때 503 확인. `npm audit`의 high 4건은 모두 prisma CLI(개발용) 안쪽 패키지(deepmerge-ts, 쓰지 않는 mysql2)라 그대로 둠
 - 10/10: PR C(일정·카테고리 API) 작성. 단위 테스트 70개, 통합 테스트 41개 통과. `npm run dev`로 데모 사용자의 일정 만들기·조회·동기화·카테고리 확인. Prisma 7의 `migrate dev`가 Client를 다시 만들지 않아 `db:migrate` 스크립트에 `prisma generate`를 붙임
+- 10/10: 팀원에게 보낼 정리 문서 작성 ([부담도 캘린더 백엔드 진행 정리](https://claude.ai/code/artifact/84d9712b-7aef-4037-8f67-7e9c47de8c68): 된 것, 팀 결정, API 요약, 구글 로그인 연결, 물어볼 것, 일정). PR A·B·C 브랜치를 GitHub에 올림(PR은 #1 머지 후)
