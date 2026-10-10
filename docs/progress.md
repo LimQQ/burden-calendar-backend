@@ -1,13 +1,13 @@
 # 진척 상황과 할 일
 
-마지막 갱신: 2026-10-09
+마지막 갱신: 2026-10-10
 
 작업을 마치거나 팀 결정이 생길 때마다 이 문서를 고친다. 끝난 일은 체크하고 '진행 기록'에 날짜와 함께 남긴다.
 
 ## 지금 상태
-- 단계: Phase 0 완료, PR #1(`phase0/skeleton` → main) 머지 대기
+- 단계: Phase 1 코드 완료(PR A·B·C, 데모 사용자 기준). PR #1 머지 후 차례로 올림. 실제 구글 계정 확인만 남음
 - 코드 저장소: `C:\Users\561gu\Desktop\burden-calendar-backend`. 설계 문서(`CLAUDE.md`, `docs/`)도 여기에 둔다. GitHub는 private 저장소
-- 다음 할 일: PR #1 확인·머지 → Phase 1 준비(Google Cloud OAuth 설정, 프론트 팀과 v1 문서·구글 로그인 방식 맞추기)
+- 다음 할 일: PR #1 머지(직접) → PR A·B·C 올리기. Google Cloud OAuth 설정 후 실제 구글 계정으로 확인. 그다음 Phase 2(부담도 엔진)
 - 일정: 개발 중심 기간 11/2~12/6, User Study 12/7·12/9
 
 ## 해야 할 일
@@ -35,17 +35,33 @@
 - [ ] PR #1 머지
 
 ### Phase 1 구글 로그인 + 캘린더 기본 기능
-- [ ] `POST /v1/auth/google`, 자체 JWT, refresh token 암호화 저장
-- [ ] `POST /v1/calendar/sync` (기본 ±3개월)
-- [ ] `GET`·`POST`·`PATCH`·`DELETE /v1/events`
-- [ ] 제목 규칙 `[카테고리] 일정 제목`, 카테고리 API(`/v1/categories`)
-- [ ] 일정 종류 분류와 마감(깃발) 판정 (분류 테스트 C1~C7)
-- [ ] 완료·중요 표시
+PR A 제목 규칙·종류 분류 (브랜치 `phase1/title-classify`)
+- [x] 제목 규칙 `[카테고리] 일정 제목` 나누기·만들기 (10/10)
+- [x] 일정 종류 분류, 마감(깃발) 판정, 기본 준비 시간. 분류 테스트 C1~C7 통과 (10/10)
+- [x] 키워드·계수를 `src/burden/params.ts`로 (10/10)
+- [ ] PR 올리고 머지
+
+PR B 로그인 (브랜치 `phase1/auth`, PR A 위에 쌓음)
+- [x] 자체 JWT 발급·검사(7일), 인증 미들웨어 (10/10)
+- [x] `POST /v1/auth/google`: idToken 검증, serverAuthCode 교환, refresh token AES-256-GCM 암호화 저장 (10/10, 구글 쪽은 가짜 객체로 테스트)
+- [x] `POST /v1/auth/demo` (빈 데모 사용자), `GET /v1/me` (10/10)
+- [x] 통합 테스트(실제 PostgreSQL, `npm run test:db`)와 CI의 PostgreSQL 서비스 (10/10)
+- [ ] 실제 구글 계정으로 로그인 확인 (Google Cloud OAuth 설정과 앱의 serverAuthCode가 있어야 함)
+- [ ] PR 올리고 머지
+
+PR C 일정·카테고리 API (브랜치 `phase1/events`, PR B 위에 쌓음)
+- [x] 일정 저장 방식 2가지: 구글 캘린더(실제 사용자) / DB만(데모 사용자) (10/10)
+- [x] `POST /v1/calendar/sync` (기본 캘린더, 기본 ±3개월) (10/10)
+- [x] `GET`·`POST`·`PATCH`·`DELETE /v1/events`, 완료·중요·깃발·준비 시간 사용자 지정 (10/10)
+- [x] `GET`·`POST`·`PATCH /v1/categories` (10/10)
+- [x] 사용자가 고친 준비 시간을 지키려고 `Event.prepHoursSource` 추가(마이그레이션 `20261010082410_prep_hours_source`) (10/10)
+- [ ] 실제 구글 캘린더로 만들기·고치기·지우기·동기화 확인 (테스트는 가짜 구글 캘린더로 함)
+- [ ] PR 올리고 머지
 
 ### Phase 2 부담도 엔진 + 히트맵 API
 - [ ] 부담도 엔진 (순수 함수, `params.ts`) (점수 테스트 1~11)
 - [ ] `GET /v1/burden/days`, `GET /v1/burden/days/:date`, 규칙 점수(`model=rule`)
-- [ ] 데모 사용자(`POST /v1/auth/demo`)와 시드 데이터
+- [ ] User Study 시드 데이터 (데모 로그인의 `scenario`)
 
 ### Phase 3 시작 설정 + 저녁 체크인 + 개인 보정
 - [ ] `PUT /v1/me/profile`, `PUT /v1/me/weights`
@@ -81,6 +97,10 @@
 | 10/9 | GitHub 저장소는 일단 private | - |
 | 10/9 | DB 스키마 전체와 첫 마이그레이션을 Phase 0에 넣음 (DB 연결까지 확인하려고) | `prisma/schema.prisma` |
 | 10/9 | TypeScript 6.0, Prisma 7.10 사용 (TS 7은 typescript-eslint 미지원, Prisma 8은 아직 출시 후보) | `CLAUDE.md` 버전 메모 |
+| 10/10 | Phase 1을 PR 3개로 나눈다 (A 제목 규칙·종류 분류, B 로그인, C 일정·카테고리 API) | `CLAUDE.md` 단계 |
+| 10/10 | 데모 로그인을 Phase 1로 앞당김 (빈 데모 사용자). 시드 데이터는 Phase 2 그대로 | `CLAUDE.md` 단계, `docs/api-draft.md` |
+| 10/10 | 구글 동기화는 기본(primary) 캘린더만 | `CLAUDE.md` 구글 연동 주의 |
+| 10/10 | 시험 키워드에 '중간'을 더함 (예외 사전이 막으려던 경우가 실제로 생기게) | `docs/burden-model.md` 1절 |
 
 ## 진행 기록
 - 10/8 이전: 설계 문서 v0 작성 (CLAUDE.md, 부담도 모델, API·DB 초안, claude.ai 채팅에서)
@@ -89,3 +109,7 @@
 - 10/9: 바탕화면에 코드 저장소 폴더 `burden-calendar-backend`를 만들고 설계 문서를 옮김. Node.js LTS·GitHub CLI 설치. Docker는 winget 패키지 이름을 잘못 안내해(`Docker.Docker`) 설치 실패, `Docker.DockerDesktop`으로 다시 설치해 완료. 개발 도구 준비 끝(Node 24.20, npm 11.19, Docker 29.8, gh 2.102)
 - 10/9: git 시작(main에 설계 문서 첫 커밋). `phase0/skeleton` 브랜치에서 Phase 0 뼈대 작성. lint·타입 검사·테스트 6개·빌드 통과, `npm run dev`로 `/health` 응답 확인. 첫 마이그레이션은 Docker가 꺼져 있어 `prisma migrate diff`로 스키마에서 만듦
 - 10/9: GitHub private 저장소 `LimQQ/burden-calendar-backend` 만들고 PR #1 올림(CI 통과). `docker compose up --build`로 db·migrate·api 실행 확인. Phase 0 완료
+- 10/10: PR #1 머지는 자동 모드 안전장치에 막혀 직접 머지하기로 함. Phase 1 계획 승인. PR A(제목 규칙·종류 분류) 작성, 테스트 32개 통과
+- 10/10: PR B(로그인) 작성. 단위 테스트 49개, 통합 테스트 10개 통과. `npm run dev`로 데모 로그인 → `/v1/me`, 구글 설정 없을 때 503 확인. `npm audit`의 high 4건은 모두 prisma CLI(개발용) 안쪽 패키지(deepmerge-ts, 쓰지 않는 mysql2)라 그대로 둠
+- 10/10: PR C(일정·카테고리 API) 작성. 단위 테스트 70개, 통합 테스트 41개 통과. `npm run dev`로 데모 사용자의 일정 만들기·조회·동기화·카테고리 확인. Prisma 7의 `migrate dev`가 Client를 다시 만들지 않아 `db:migrate` 스크립트에 `prisma generate`를 붙임
+- 10/10: 팀원에게 보낼 정리 문서 작성 ([부담도 캘린더 백엔드 진행 정리](https://claude.ai/code/artifact/84d9712b-7aef-4037-8f67-7e9c47de8c68): 된 것, 팀 결정, API 요약, 구글 로그인 연결, 물어볼 것, 일정). PR A·B·C 브랜치를 GitHub에 올림(PR은 #1 머지 후)
