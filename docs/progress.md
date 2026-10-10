@@ -5,9 +5,9 @@
 작업을 마치거나 팀 결정이 생길 때마다 이 문서를 고친다. 끝난 일은 체크하고 '진행 기록'에 날짜와 함께 남긴다.
 
 ## 지금 상태
-- 단계: 설계 문서 v1 완료, Phase 0(저장소 뼈대) 시작 전
-- 코드 저장소: `C:\Users\561gu\Desktop\burden-calendar-backend`. 설계 문서(`CLAUDE.md`, `docs/`)도 여기에 둔다. git·GitHub는 아직
-- 다음 할 일: Phase 0 계획 승인받고 시작. v1 문서는 프론트 팀과 따로 맞춘다
+- 단계: Phase 0 완료, PR #1(`phase0/skeleton` → main) 머지 대기
+- 코드 저장소: `C:\Users\561gu\Desktop\burden-calendar-backend`. 설계 문서(`CLAUDE.md`, `docs/`)도 여기에 둔다. GitHub는 private 저장소
+- 다음 할 일: PR #1 확인·머지 → Phase 1 준비(Google Cloud OAuth 설정, 프론트 팀과 v1 문서·구글 로그인 방식 맞추기)
 - 일정: 개발 중심 기간 11/2~12/6, User Study 12/7·12/9
 
 ## 해야 할 일
@@ -19,16 +19,20 @@
 - [x] 코드 저장소 위치 정하기: 바탕화면 `burden-calendar-backend` (10/9)
 - [x] Node.js LTS(24.20.0), GitHub CLI 설치 (10/9, git은 원래 있음)
 - [x] Docker Desktop 설치 (10/9, Docker 29.8 / Compose 5.5)
-- [ ] GitHub CLI 로그인 (`gh auth login`) 후 GitHub 저장소 만들기
+- [x] GitHub CLI 로그인 (10/9, 계정 LimQQ)
 - [x] 설계 문서(`CLAUDE.md`, `docs/`)를 코드 저장소로 옮기기 (10/9)
 - [ ] Google Cloud 프로젝트와 OAuth 클라이언트 만들기 (External + Testing, 팀원을 테스트 사용자로 등록)
 - [ ] `serverAuthCode`를 받는 방법을 프론트 팀과 맞추기 (Flutter `google_sign_in` 버전)
 
 ### Phase 0 저장소 뼈대
-- [ ] TypeScript·Express, ESLint·Prettier, Vitest
-- [ ] Dockerfile, docker-compose(api + postgres), Prisma
-- [ ] `GET /health`, `.env.example`, README
-- [ ] GitHub Actions (lint + test)
+- [x] TypeScript·Express, ESLint·Prettier, Vitest (10/9)
+- [x] Dockerfile, docker-compose(db → migrate → api), Prisma 설정 (10/9)
+- [x] DB 스키마(api-draft 표 9개)와 첫 마이그레이션 `20261009000000_init` (10/9)
+- [x] `GET /health`, 오류 응답 형식(404·400·500), `.env.example`, README (10/9)
+- [x] GitHub Actions: lint + 타입 검사 + 테스트 + 빌드 (10/9)
+- [x] `docker compose up --build`로 db·migrate·api 실행 확인: 테이블 9개 생성, `/health` 응답, 스키마와 마이그레이션 차이 없음 (10/9)
+- [x] GitHub private 저장소(`LimQQ/burden-calendar-backend`) 만들고 PR #1 올림, 첫 CI 통과 (10/9)
+- [ ] PR #1 머지
 
 ### Phase 1 구글 로그인 + 캘린더 기본 기능
 - [ ] `POST /v1/auth/google`, 자체 JWT, refresh token 암호화 저장
@@ -74,9 +78,14 @@
 | 10/8 | 카테고리 색은 사용자가 고름 | `docs/api-draft.md` 카테고리 |
 | 10/9 | 코드 저장소는 바탕화면 `burden-calendar-backend` (구글 드라이브 밖) | 이 문서 '지금 상태' |
 | 10/9 | 설계 문서(`CLAUDE.md`, `docs/`)는 코드 저장소에 둔다. 구글 드라이브 폴더에는 스케치 PDF만 남긴다 | `CLAUDE.md` |
+| 10/9 | GitHub 저장소는 일단 private | - |
+| 10/9 | DB 스키마 전체와 첫 마이그레이션을 Phase 0에 넣음 (DB 연결까지 확인하려고) | `prisma/schema.prisma` |
+| 10/9 | TypeScript 6.0, Prisma 7.10 사용 (TS 7은 typescript-eslint 미지원, Prisma 8은 아직 출시 후보) | `CLAUDE.md` 버전 메모 |
 
 ## 진행 기록
 - 10/8 이전: 설계 문서 v0 작성 (CLAUDE.md, 부담도 모델, API·DB 초안, claude.ai 채팅에서)
 - 10/7: 팀 앱 구상도 공유 (`지능hci 앱 구상도_261007_212200.pdf`)
 - 10/8: 앱 구상도를 반영해 설계 문서를 v1로 고침. 문서를 `지능HCI/조별과제` 폴더로 모으고 이 문서를 만듦
 - 10/9: 바탕화면에 코드 저장소 폴더 `burden-calendar-backend`를 만들고 설계 문서를 옮김. Node.js LTS·GitHub CLI 설치. Docker는 winget 패키지 이름을 잘못 안내해(`Docker.Docker`) 설치 실패, `Docker.DockerDesktop`으로 다시 설치해 완료. 개발 도구 준비 끝(Node 24.20, npm 11.19, Docker 29.8, gh 2.102)
+- 10/9: git 시작(main에 설계 문서 첫 커밋). `phase0/skeleton` 브랜치에서 Phase 0 뼈대 작성. lint·타입 검사·테스트 6개·빌드 통과, `npm run dev`로 `/health` 응답 확인. 첫 마이그레이션은 Docker가 꺼져 있어 `prisma migrate diff`로 스키마에서 만듦
+- 10/9: GitHub private 저장소 `LimQQ/burden-calendar-backend` 만들고 PR #1 올림(CI 통과). `docker compose up --build`로 db·migrate·api 실행 확인. Phase 0 완료

@@ -22,11 +22,12 @@
 
 | HTTP | code | 뜻 |
 |---|---|---|
-| 400 | VALIDATION_ERROR | 요청 형식이 틀림 |
+| 400 | VALIDATION_ERROR | 요청 형식이 틀림 (읽을 수 없는 JSON 포함) |
 | 401 | UNAUTHENTICATED | 서버 JWT가 없거나 만료됨 |
 | 401 | REAUTH_REQUIRED | 구글 refresh token이 만료됨 → 구글 재로그인 |
 | 404 | NOT_FOUND | 없는 일정·카테고리 |
 | 502 | GOOGLE_API_ERROR | 구글 호출 실패 (DB는 바뀌지 않음) |
+| 500 | INTERNAL_ERROR | 처리하지 못한 서버 오류 |
 
 ## 엔드포인트
 

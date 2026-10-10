@@ -28,11 +28,17 @@
 - 배포 DB는 미정이다. 정해지기 전까지 DB 접근은 Prisma 계층에만 둔다.
 
 ## 명령어
-Phase 0에서 실제 명령어를 만든 뒤 이 칸을 갱신한다.
-- 개발 서버: (미정)
-- 테스트: (미정)
-- 린트: (미정)
-- 로컬 전체 실행: (미정, docker compose 예정)
+- 처음 설정: `npm install` → `.env.example`을 `.env`로 복사 → `npm run db:generate`
+- 개발 서버: `npm run dev` (DB가 필요하면 먼저 `docker compose up -d db`)
+- 테스트: `npm test`
+- 린트: `npm run lint` (자동 수정은 `npm run format`), 타입 검사: `npm run typecheck`
+- DB 스키마 변경: `prisma/schema.prisma`를 고친 뒤 `npm run db:migrate` (마이그레이션 생성·적용, Client 재생성)
+- 로컬 전체 실행: `docker compose up --build` (db → migrate → api)
+
+## 버전 메모
+- TypeScript는 6.0을 쓴다. 7.0은 typescript-eslint가 아직 지원하지 않는다.
+- Prisma는 7.10을 쓴다. Client는 `src/generated/prisma`에 생성되고(커밋하지 않음) `../generated/prisma/client.js`에서 가져온다. DB 연결은 `@prisma/adapter-pg`, DB 주소는 `prisma.config.ts`에서 읽는다.
+- npm 11은 설치 스크립트를 `package.json`의 `allowScripts`에 적힌 패키지만 실행한다. prisma·esbuild 버전을 올리면 `npm install-scripts approve`로 다시 허용한다.
 
 ## 폴더 구조 (목표)
 ```
@@ -70,7 +76,7 @@ tests/
 - 반복 일정: 펼친 회차 하나를 일정 하나로 다룬다. 수정·삭제도 그 회차에만 적용한다(가정. '이후 모두'·'전체' 수정은 나중).
 - User Study는 참가자의 실제 캘린더 대신 미리 만든 시드 데이터로 진행한다. 그래서 구글 로그인 없이 쓰는 데모 사용자(`POST /v1/auth/demo`)를 둔다. 데모 사용자의 일정 생성·수정·삭제는 구글 없이 DB에만 반영한다.
 
-## 단계 (현재: Phase 0)
+## 단계 (현재: Phase 0 완료, PR #1 머지 후 Phase 1)
 - Phase 0 저장소 뼈대: TypeScript·Express, ESLint·Prettier, Vitest, Dockerfile, docker-compose(api + postgres), Prisma, `GET /health`, `.env.example`, GitHub Actions(lint + test), README
 - Phase 1 구글 로그인 + 캘린더 기본 기능: `/v1/auth/google`, 토큰 암호화 저장, `/v1/calendar/sync`, 일정 조회·생성·수정·삭제(`/v1/events`), 제목 규칙과 카테고리, 일정 종류 분류(키워드 규칙)와 마감(깃발) 판정, 완료·중요 표시
 - Phase 2 부담도 엔진 + 히트맵 API: 날짜별 점수·근거, `GET /v1/burden/days`, 데모 사용자와 시드 데이터
