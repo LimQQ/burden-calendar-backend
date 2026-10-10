@@ -14,8 +14,8 @@ export class ApiError extends Error {
   readonly status: number;
   readonly code: ErrorCode;
 
-  constructor(status: number, code: ErrorCode, message: string) {
-    super(message);
+  constructor(status: number, code: ErrorCode, message: string, options?: { cause?: unknown }) {
+    super(message, options);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
@@ -30,6 +30,9 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   let apiError: ApiError;
   if (err instanceof ApiError) {
     apiError = err;
+    if (apiError.status >= 500) {
+      req.log.warn({ err: apiError.cause ?? apiError }, apiError.message);
+    }
   } else if (isBodyParseError(err)) {
     apiError = new ApiError(400, "VALIDATION_ERROR", "요청 본문을 읽을 수 없습니다.");
   } else {

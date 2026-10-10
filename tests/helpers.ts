@@ -20,6 +20,7 @@ export function testDeps(overrides: Partial<AppDeps> = {}): AppDeps {
     db: overrides.db ?? createDb("postgresql://unused:unused@localhost:1/unused"),
     jwt: createJwtService(TEST_JWT_SECRET),
     googleAuth: null,
+    calendarFor: null,
     tokenCipher: createTokenCipher(randomBytes(32)),
     ...overrides,
   };

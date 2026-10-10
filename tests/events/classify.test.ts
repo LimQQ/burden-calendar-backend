@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyEvent } from "../../src/events/classify.js";
+import { classifyEvent, resolveClassification } from "../../src/events/classify.js";
 import { parseTitle } from "../../src/events/title.js";
 
 // docs/burden-model.md 7절 '종류 분류' 표 C1~C7.
@@ -72,6 +72,48 @@ describe("classifyEvent 추가 규칙", () => {
       confidence: "low",
       isDeadline: true,
       prepHours: null,
+    });
+  });
+});
+
+describe("resolveClassification", () => {
+  const exam = { title: "중간고사", category: "데이터베이스" };
+
+  it("고정한 값이 없으면 규칙 결과", () => {
+    expect(resolveClassification(exam, {})).toEqual({
+      type: "exam",
+      typeSource: "rule",
+      typeConfidence: "high",
+      isDeadline: true,
+      deadlineSource: "rule",
+      prepHours: 10,
+      prepHoursSource: "rule",
+    });
+  });
+
+  it("사용자가 고정한 종류는 그대로 두고, 준비 시간은 그 종류로 다시 정한다", () => {
+    expect(resolveClassification(exam, { type: "presentation" })).toMatchObject({
+      type: "presentation",
+      typeSource: "user",
+      typeConfidence: "high",
+      isDeadline: true,
+      prepHours: 6,
+    });
+  });
+
+  it("깃발을 끄면 준비 시간도 없다", () => {
+    expect(resolveClassification(exam, { isDeadline: false })).toMatchObject({
+      isDeadline: false,
+      deadlineSource: "user",
+      prepHours: null,
+      prepHoursSource: "rule",
+    });
+  });
+
+  it("사용자가 고친 준비 시간은 규칙이 바꾸지 않는다", () => {
+    expect(resolveClassification(exam, { prepHours: 4 })).toMatchObject({
+      prepHours: 4,
+      prepHoursSource: "user",
     });
   });
 });

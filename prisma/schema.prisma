@@ -112,25 +112,27 @@ model Category {
 
 /// 데모 사용자의 일정은 googleEventId가 null이다.
 model Event {
-  id             String      @id @default(cuid())
-  userId         String
-  googleEventId  String?
-  calendarId     String?
-  title          String
-  categoryId     String?
-  startAt        DateTime
-  endAt          DateTime
-  allDay         Boolean
-  location       String?
-  type           EventType
-  typeSource     ValueSource
-  typeConfidence Confidence
-  isDeadline     Boolean     @default(false)
-  deadlineSource ValueSource
-  important      Boolean     @default(false)
-  completedAt    DateTime?
-  prepHours      Float?
-  updatedAt      DateTime    @updatedAt
+  id              String      @id @default(cuid())
+  userId          String
+  googleEventId   String?
+  calendarId      String?
+  title           String
+  categoryId      String?
+  startAt         DateTime
+  endAt           DateTime
+  allDay          Boolean
+  location        String?
+  type            EventType
+  typeSource      ValueSource
+  typeConfidence  Confidence
+  isDeadline      Boolean     @default(false)
+  deadlineSource  ValueSource
+  important       Boolean     @default(false)
+  completedAt     DateTime?
+  prepHours       Float?
+  /// 사용자가 준비 시간을 고쳤으면 user. 규칙이 다시 계산하지 않는다.
+  prepHoursSource ValueSource @default(rule)
+  updatedAt       DateTime    @updatedAt
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)

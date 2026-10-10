@@ -37,7 +37,8 @@
 
 ## 버전 메모
 - TypeScript는 6.0을 쓴다. 7.0은 typescript-eslint가 아직 지원하지 않는다.
-- Prisma는 7.10을 쓴다. Client는 `src/generated/prisma`에 생성되고(커밋하지 않음) `../generated/prisma/client.js`에서 가져온다. DB 연결은 `@prisma/adapter-pg`, DB 주소는 `prisma.config.ts`에서 읽는다.
+- Prisma는 7.10을 쓴다. Client는 `src/generated/prisma`에 생성되고(커밋하지 않음) `../generated/prisma/client.js`에서 가져온다. DB 연결은 `@prisma/adapter-pg`, DB 주소는 `prisma.config.ts`에서 읽는다. Prisma 7의 `migrate dev`는 Client를 다시 만들지 않으므로 `npm run db:migrate`가 `prisma generate`까지 돌린다.
+- 구글 캘린더는 `googleapis` 전체 대신 `@googleapis/calendar`를 쓴다. 테스트에서는 `tests/fake-google-calendar.ts`로 바꾼다.
 - npm 11은 설치 스크립트를 `package.json`의 `allowScripts`에 적힌 패키지만 실행한다. prisma·esbuild 버전을 올리면 `npm install-scripts approve`로 다시 허용한다.
 
 ## 폴더 구조 (목표)

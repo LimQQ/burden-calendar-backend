@@ -5,9 +5,9 @@
 작업을 마치거나 팀 결정이 생길 때마다 이 문서를 고친다. 끝난 일은 체크하고 '진행 기록'에 날짜와 함께 남긴다.
 
 ## 지금 상태
-- 단계: Phase 1 진행 중. PR A(제목 규칙·종류 분류)·PR B(로그인) 코드 완료. PR #1 머지 후 차례로 올림
+- 단계: Phase 1 코드 완료(PR A·B·C, 데모 사용자 기준). PR #1 머지 후 차례로 올림. 실제 구글 계정 확인만 남음
 - 코드 저장소: `C:\Users\561gu\Desktop\burden-calendar-backend`. 설계 문서(`CLAUDE.md`, `docs/`)도 여기에 둔다. GitHub는 private 저장소
-- 다음 할 일: PR #1 머지(직접) → PR A·B 올리기 → PR C(일정·카테고리 API). 그동안 Google Cloud OAuth 설정
+- 다음 할 일: PR #1 머지(직접) → PR A·B·C 올리기. Google Cloud OAuth 설정 후 실제 구글 계정으로 확인. 그다음 Phase 2(부담도 엔진)
 - 일정: 개발 중심 기간 11/2~12/6, User Study 12/7·12/9
 
 ## 해야 할 일
@@ -49,11 +49,14 @@ PR B 로그인 (브랜치 `phase1/auth`, PR A 위에 쌓음)
 - [ ] 실제 구글 계정으로 로그인 확인 (Google Cloud OAuth 설정과 앱의 serverAuthCode가 있어야 함)
 - [ ] PR 올리고 머지
 
-PR C 일정·카테고리 API
-- [ ] 일정 저장 방식 2가지: 구글 캘린더(실제 사용자) / DB만(데모 사용자)
-- [ ] `POST /v1/calendar/sync` (기본 캘린더, 기본 ±3개월)
-- [ ] `GET`·`POST`·`PATCH`·`DELETE /v1/events`, 완료·중요·깃발 사용자 지정
-- [ ] `GET`·`POST`·`PATCH /v1/categories`
+PR C 일정·카테고리 API (브랜치 `phase1/events`, PR B 위에 쌓음)
+- [x] 일정 저장 방식 2가지: 구글 캘린더(실제 사용자) / DB만(데모 사용자) (10/10)
+- [x] `POST /v1/calendar/sync` (기본 캘린더, 기본 ±3개월) (10/10)
+- [x] `GET`·`POST`·`PATCH`·`DELETE /v1/events`, 완료·중요·깃발·준비 시간 사용자 지정 (10/10)
+- [x] `GET`·`POST`·`PATCH /v1/categories` (10/10)
+- [x] 사용자가 고친 준비 시간을 지키려고 `Event.prepHoursSource` 추가(마이그레이션 `20261010082410_prep_hours_source`) (10/10)
+- [ ] 실제 구글 캘린더로 만들기·고치기·지우기·동기화 확인 (테스트는 가짜 구글 캘린더로 함)
+- [ ] PR 올리고 머지
 
 ### Phase 2 부담도 엔진 + 히트맵 API
 - [ ] 부담도 엔진 (순수 함수, `params.ts`) (점수 테스트 1~11)
@@ -108,3 +111,4 @@ PR C 일정·카테고리 API
 - 10/9: GitHub private 저장소 `LimQQ/burden-calendar-backend` 만들고 PR #1 올림(CI 통과). `docker compose up --build`로 db·migrate·api 실행 확인. Phase 0 완료
 - 10/10: PR #1 머지는 자동 모드 안전장치에 막혀 직접 머지하기로 함. Phase 1 계획 승인. PR A(제목 규칙·종류 분류) 작성, 테스트 32개 통과
 - 10/10: PR B(로그인) 작성. 단위 테스트 49개, 통합 테스트 10개 통과. `npm run dev`로 데모 로그인 → `/v1/me`, 구글 설정 없을 때 503 확인. `npm audit`의 high 4건은 모두 prisma CLI(개발용) 안쪽 패키지(deepmerge-ts, 쓰지 않는 mysql2)라 그대로 둠
+- 10/10: PR C(일정·카테고리 API) 작성. 단위 테스트 70개, 통합 테스트 41개 통과. `npm run dev`로 데모 사용자의 일정 만들기·조회·동기화·카테고리 확인. Prisma 7의 `migrate dev`가 Client를 다시 만들지 않아 `db:migrate` 스크립트에 `prisma generate`를 붙임
