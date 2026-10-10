@@ -72,14 +72,15 @@ tests/
 - OAuth 동의 화면이 External + Testing 상태이면 등록한 테스트 사용자만 로그인할 수 있고, 캘린더 범위를 받은 refresh token은 7일 뒤 만료된다. 만료되면 401과 `REAUTH_REQUIRED` 코드를 돌려 재로그인을 유도한다.
 - 쓰기 순서: 구글에 먼저 쓰고, 성공하면 DB에 반영한다. 구글 호출이 실패하면 DB를 바꾸지 않고 `GOOGLE_API_ERROR`를 돌려준다.
 - 구글에 쓰는 것은 제목(`[카테고리] 일정 제목`), 시작·종료, 종일 여부, 장소뿐이다. 완료·중요·마감 여부·종류·준비 시간은 DB에만 둔다.
+- 동기화 대상은 사용자의 기본(primary) 캘린더 하나뿐이다. 새 일정도 기본 캘린더에 만든다.
 - 일정 조회는 `events.list`에 `singleEvents=true`(반복 일정 펼침)와 기간(timeMin/timeMax)을 지정하는 방식으로 시작한다. 기본 동기화 범위는 오늘 기준 과거 3개월 ~ 미래 3개월(미래 범위는 가정)이고, 앱이 그 밖을 보려 하면 그 기간을 다시 동기화한다. 동기화한 기간 안에서 구글에 더 이상 없는 일정은 DB에서도 지운다. syncToken 증분 동기화는 나중 단계이며, 410 응답을 받으면 전체 재동기화한다.
 - 반복 일정: 펼친 회차 하나를 일정 하나로 다룬다. 수정·삭제도 그 회차에만 적용한다(가정. '이후 모두'·'전체' 수정은 나중).
 - User Study는 참가자의 실제 캘린더 대신 미리 만든 시드 데이터로 진행한다. 그래서 구글 로그인 없이 쓰는 데모 사용자(`POST /v1/auth/demo`)를 둔다. 데모 사용자의 일정 생성·수정·삭제는 구글 없이 DB에만 반영한다.
 
-## 단계 (현재: Phase 0 완료, PR #1 머지 후 Phase 1)
+## 단계 (현재: Phase 1)
 - Phase 0 저장소 뼈대: TypeScript·Express, ESLint·Prettier, Vitest, Dockerfile, docker-compose(api + postgres), Prisma, `GET /health`, `.env.example`, GitHub Actions(lint + test), README
-- Phase 1 구글 로그인 + 캘린더 기본 기능: `/v1/auth/google`, 토큰 암호화 저장, `/v1/calendar/sync`, 일정 조회·생성·수정·삭제(`/v1/events`), 제목 규칙과 카테고리, 일정 종류 분류(키워드 규칙)와 마감(깃발) 판정, 완료·중요 표시
-- Phase 2 부담도 엔진 + 히트맵 API: 날짜별 점수·근거, `GET /v1/burden/days`, 데모 사용자와 시드 데이터
+- Phase 1 구글 로그인 + 캘린더 기본 기능: `/v1/auth/google`, 데모 로그인 `/v1/auth/demo`(빈 데모 사용자), 토큰 암호화 저장, `/v1/calendar/sync`, 일정 조회·생성·수정·삭제(`/v1/events`), 제목 규칙과 카테고리, 일정 종류 분류(키워드 규칙)와 마감(깃발) 판정, 완료·중요 표시. PR 3개로 나눈다: A 제목 규칙·종류 분류, B 로그인, C 일정·카테고리 API
+- Phase 2 부담도 엔진 + 히트맵 API: 날짜별 점수·근거, `GET /v1/burden/days`, User Study 시드 데이터(데모 로그인의 `scenario`)
 - Phase 3 시작 설정 + 저녁 체크인 + 개인 보정
 - Phase 4 자연어 입력(규칙 기반 문장 해석) → 부담 변화 미리보기 → 일정 추가(Phase 1의 `POST /v1/events` 사용)
 - Phase 5 과부하 경고, 재배치·휴식 제안

@@ -35,7 +35,7 @@
 |---|---|---|---|
 | 0 | GET /health | - | `{ "ok": true }` |
 | 1 | POST /v1/auth/google | `{ idToken, serverAuthCode }` | `{ accessToken, user: { id, email, name }, needsOnboarding }` |
-| 2 | POST /v1/auth/demo | `{ scenario }` | `{ accessToken, user }` (시드 데이터 사용자) |
+| 1 | POST /v1/auth/demo | `{ scenario? }` | `{ accessToken, user }` (데모 사용자. `scenario`로 시드 데이터를 고르는 것은 Phase 2) |
 | 1 | GET /v1/me | - | `{ id, email, name, profile }` |
 | 1 | POST /v1/calendar/sync | `{ from?, to? }` (기본: 오늘 −3개월 ~ +3개월) | `{ fetched, upserted, deleted }` |
 | 1 | GET /v1/events?from=&to= | - | `Event[]` (시작 시각 순) |
