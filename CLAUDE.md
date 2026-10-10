@@ -81,7 +81,7 @@ tests/
 - 반복 일정: 펼친 회차 하나를 일정 하나로 다룬다. 수정·삭제도 그 회차에만 적용한다(가정. '이후 모두'·'전체' 수정은 나중).
 - User Study는 참가자의 실제 캘린더 대신 미리 만든 시드 데이터로 진행한다. 그래서 구글 로그인 없이 쓰는 데모 사용자(`POST /v1/auth/demo`)를 둔다. 데모 사용자의 일정 생성·수정·삭제는 구글 없이 DB에만 반영한다.
 
-## 단계 (현재: Phase 1 완료 PR #2 리뷰 중, Phase 4 자연어 해석을 먼저 진행)
+## 단계 (현재: Phase 0·1 완료, Phase 4 자연어 해석을 먼저 진행 중)
 - Phase 0 저장소 뼈대: TypeScript·Express, ESLint·Prettier, Vitest, Dockerfile, docker-compose(api + postgres), Prisma, `GET /health`, `.env.example`, GitHub Actions(lint + test), README
 - Phase 1 구글 로그인 + 캘린더 기본 기능: `/v1/auth/google`, 데모 로그인 `/v1/auth/demo`(빈 데모 사용자), 토큰 암호화 저장, `/v1/calendar/sync`, 일정 조회·생성·수정·삭제(`/v1/events`), 제목 규칙과 카테고리, 일정 종류 분류(키워드 규칙)와 마감(깃발) 판정, 완료·중요 표시. PR 3개로 나눈다: A 제목 규칙·종류 분류, B 로그인, C 일정·카테고리 API
 - Phase 2 부담도 엔진 + 히트맵 API: 날짜별 점수·근거, `GET /v1/burden/days`, User Study 시드 데이터(데모 로그인의 `scenario`)

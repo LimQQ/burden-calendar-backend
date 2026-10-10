@@ -5,9 +5,9 @@
 작업을 마치거나 팀 결정이 생길 때마다 이 문서를 고친다. 끝난 일은 체크하고 '진행 기록'에 날짜와 함께 남긴다.
 
 ## 지금 상태
-- 단계: Phase 1 코드 완료(PR #2 리뷰 중). Phase 4의 자연어 해석(`/v1/nlp/parse`)을 앞당겨 만듦(브랜치 `phase4/nlp`)
+- 단계: Phase 0·1 완료(PR #1·#2 머지). Phase 4의 자연어 해석(`/v1/nlp/parse`)을 앞당겨 만들어 PR로 올림(브랜치 `phase4/nlp`)
 - 코드 저장소: `C:\Users\561gu\Desktop\burden-calendar-backend`. 설계 문서(`CLAUDE.md`, `docs/`)도 여기에 둔다. GitHub는 private 저장소
-- 다음 할 일: PR #1·#2 머지(직접) → 자연어 해석 PR. Gemini API 키를 넣고 실제 해석 확인. Google Cloud OAuth 설정 후 실제 구글 계정 확인. 그다음 Phase 2(부담도 엔진)
+- 다음 할 일: 자연어 해석 PR 리뷰·머지. Gemini API 키를 넣고 실제 해석 확인(Flash와 Flash-Lite 비교). Google Cloud OAuth 설정 후 실제 구글 계정 확인. 그다음 Phase 2(부담도 엔진)
 - 일정: 개발 중심 기간 11/2~12/6, User Study 12/7·12/9
 
 ## 해야 할 일
@@ -32,14 +32,14 @@
 - [x] GitHub Actions: lint + 타입 검사 + 테스트 + 빌드 (10/9)
 - [x] `docker compose up --build`로 db·migrate·api 실행 확인: 테이블 9개 생성, `/health` 응답, 스키마와 마이그레이션 차이 없음 (10/9)
 - [x] GitHub private 저장소(`LimQQ/burden-calendar-backend`) 만들고 PR #1 올림, 첫 CI 통과 (10/9)
-- [ ] PR #1 머지
+- [x] PR #1 머지 (10/10, 일반 merge)
 
 ### Phase 1 구글 로그인 + 캘린더 기본 기능
 PR A 제목 규칙·종류 분류 (브랜치 `phase1/title-classify`)
 - [x] 제목 규칙 `[카테고리] 일정 제목` 나누기·만들기 (10/10)
 - [x] 일정 종류 분류, 마감(깃발) 판정, 기본 준비 시간. 분류 테스트 C1~C7 통과 (10/10)
 - [x] 키워드·계수를 `src/burden/params.ts`로 (10/10)
-- [ ] PR 올리고 머지
+- [x] PR #2로 머지 (10/10, A·B·C를 한 PR로)
 
 PR B 로그인 (브랜치 `phase1/auth`, PR A 위에 쌓음)
 - [x] 자체 JWT 발급·검사(7일), 인증 미들웨어 (10/10)
@@ -47,7 +47,7 @@ PR B 로그인 (브랜치 `phase1/auth`, PR A 위에 쌓음)
 - [x] `POST /v1/auth/demo` (빈 데모 사용자), `GET /v1/me` (10/10)
 - [x] 통합 테스트(실제 PostgreSQL, `npm run test:db`)와 CI의 PostgreSQL 서비스 (10/10)
 - [ ] 실제 구글 계정으로 로그인 확인 (Google Cloud OAuth 설정과 앱의 serverAuthCode가 있어야 함)
-- [ ] PR 올리고 머지
+- [x] PR #2로 머지 (10/10)
 
 PR C 일정·카테고리 API (브랜치 `phase1/events`, PR B 위에 쌓음)
 - [x] 일정 저장 방식 2가지: 구글 캘린더(실제 사용자) / DB만(데모 사용자) (10/10)
@@ -56,7 +56,7 @@ PR C 일정·카테고리 API (브랜치 `phase1/events`, PR B 위에 쌓음)
 - [x] `GET`·`POST`·`PATCH /v1/categories` (10/10)
 - [x] 사용자가 고친 준비 시간을 지키려고 `Event.prepHoursSource` 추가(마이그레이션 `20261010082410_prep_hours_source`) (10/10)
 - [ ] 실제 구글 캘린더로 만들기·고치기·지우기·동기화 확인 (테스트는 가짜 구글 캘린더로 함)
-- [ ] PR 올리고 머지
+- [x] PR #2로 머지 (10/10)
 
 ### Phase 2 부담도 엔진 + 히트맵 API
 - [ ] 부담도 엔진 (순수 함수, `params.ts`) (점수 테스트 1~11)
@@ -71,7 +71,7 @@ PR C 일정·카테고리 API (브랜치 `phase1/events`, PR B 위에 쌓음)
 - [x] `POST /v1/nlp/parse`: 규칙 파서 + LLM 어댑터(Gemini). 키가 없거나 실패하면 규칙만 (10/10, 브랜치 `phase4/nlp`)
 - [ ] Gemini API 키(`GEMINI_API_KEY`)를 `.env`에 넣고 실제 문장 20~30개로 해석 확인 (직접: [Google AI Studio](https://aistudio.google.com)에서 키 만들기)
 - [ ] User Study 동의서에 "자연어 입력 문장은 구글(Gemini)로 전송된다" 넣기
-- [ ] PR 올리고 머지
+- [ ] PR 머지 (10/10 올림)
 - [ ] `POST /v1/events/preview` (부담 변화 미리보기, Phase 2 부담도 엔진 뒤)
 
 ### Phase 5 과부하 경고, 재배치·휴식 제안 (시간이 모자라면 가장 먼저 줄임)
@@ -120,4 +120,5 @@ PR C 일정·카테고리 API (브랜치 `phase1/events`, PR B 위에 쌓음)
 - 10/10: PR C(일정·카테고리 API) 작성. 단위 테스트 70개, 통합 테스트 41개 통과. `npm run dev`로 데모 사용자의 일정 만들기·조회·동기화·카테고리 확인. Prisma 7의 `migrate dev`가 Client를 다시 만들지 않아 `db:migrate` 스크립트에 `prisma generate`를 붙임
 - 10/10: PR #2(Phase 1 전체)를 main 대상으로 엶. 시연 스크립트로 데모 로그인부터 일정·카테고리·오류 응답까지 실제 서버에서 보여 줌
 - 10/10: 자연어 해석 `POST /v1/nlp/parse` 작성(규칙 파서 + Gemini 어댑터). 단위 테스트 101개, 통합 테스트 46개 통과. 키 없이 실제 서버에서 규칙 해석 확인. 분류 키워드에 '리포트'(과제)·'회식'(약속) 추가
+- 10/10: PR #1·#2가 일반 merge로 main에 들어감. 자연어 해석을 main 대상 PR로 올림. 무료 Gemini 한도 검토: 개발·시연은 무료로 충분, User Study 이틀은 유료 등급(1천 번에 1~2달러) 권장
 - 10/10: 팀원에게 보낼 정리 문서 작성 ([부담도 캘린더 백엔드 진행 정리](https://claude.ai/code/artifact/84d9712b-7aef-4037-8f67-7e9c47de8c68): 된 것, 팀 결정, API 요약, 구글 로그인 연결, 물어볼 것, 일정). PR A·B·C 브랜치를 GitHub에 올림(PR은 #1 머지 후)
