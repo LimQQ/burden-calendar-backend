@@ -8,12 +8,15 @@ import type { Db } from "./db.js";
 import { errorHandler, notFoundHandler } from "./errors.js";
 import { createEventService } from "./events/service.js";
 import type { GoogleCalendarFactory } from "./google/calendar.js";
+import type { NlpModel } from "./nlp/llm.js";
+import { createNlpService } from "./nlp/service.js";
 import { authRouter } from "./routes/auth.js";
 import { calendarRouter } from "./routes/calendar.js";
 import { categoriesRouter } from "./routes/categories.js";
 import { eventsRouter } from "./routes/events.js";
 import { healthRouter } from "./routes/health.js";
 import { meRouter } from "./routes/me.js";
+import { nlpRouter } from "./routes/nlp.js";
 
 export interface AppDeps {
   logger: Logger;
@@ -23,6 +26,8 @@ export interface AppDeps {
   googleAuth: GoogleAuth | null;
   calendarFor: GoogleCalendarFactory | null;
   tokenCipher: TokenCipher;
+  /** 자연어 입력의 LLM. 없으면 규칙만 쓴다. */
+  nlpModel: NlpModel | null;
 }
 
 export function createApp(deps: AppDeps): Express {
@@ -33,6 +38,7 @@ export function createApp(deps: AppDeps): Express {
   app.use(express.json());
 
   const events = createEventService(deps);
+  const nlp = createNlpService(deps);
 
   app.use(healthRouter);
   app.use("/v1/auth", authRouter(deps));
@@ -40,6 +46,7 @@ export function createApp(deps: AppDeps): Express {
   app.use("/v1/events", eventsRouter({ jwt: deps.jwt, events }));
   app.use("/v1/calendar", calendarRouter({ jwt: deps.jwt, events }));
   app.use("/v1/categories", categoriesRouter(deps));
+  app.use("/v1/nlp", nlpRouter({ jwt: deps.jwt, nlp }));
 
   app.use(notFoundHandler);
   app.use(errorHandler);

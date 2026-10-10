@@ -17,6 +17,8 @@
 4. 저녁 체크인과 개인 보정: 하루 한 번 5단계 체감을 받아 예측과 비교한다. 기록이 적으면 시작값 근처에 머물고, 쌓이면 실제 체감을 반영한다.
 5. 월간 히트맵: 월간 캘린더의 날짜 칸을 부담도 레벨에 따라 색칠한다. 전체·힘든 일·회복 3가지 보기, 날짜별 부담 근거(breakdown) 제공.
 6. 자연어 입력과 후속 행동: 대충 쓴 한국어를 `[카테고리] 일정 제목` 규칙에 맞는 일정으로 정리하고, 추가 전 부담 변화를 보여 주며, 과부하 경고·재배치·휴식 제안으로 연결한다.
+   - 해석 방식(10/10 결정): 규칙으로 먼저 풀고, 날짜·시작 시각·제목을 못 찾았을 때만 LLM에 묻는다. LLM은 `src/nlp/llm.ts`의 `NlpModel` 어댑터 뒤에 두고, 지금 구현은 Gemini API(무료 등급, `src/nlp/gemini.ts`)다. 키가 없거나 실패하면 규칙 결과만 쓴다.
+   - Gemini 무료 등급은 입력을 구글 제품 개선에 쓸 수 있다. User Study 동의서에 "입력한 문장이 구글로 전송된다"를 알린다.
 
 지금은 필수가 아닌 것: 리마인더 화면(중요·완료·오늘·깃발 목록). 필요해지면 일정 조회에 필터를 더한다.
 
@@ -24,7 +26,7 @@
 
 ## 기술 스택
 - 확정: Node.js, Docker, Google Cloud, 구글 로그인, Google Calendar API, GitHub
-- 가정(팀이 바꿀 수 있음): TypeScript, Express, Prisma + PostgreSQL(로컬은 docker-compose), zod(입력 검증), Luxon(시간대), Vitest(테스트), pino(로그), googleapis·google-auth-library, 배포는 Cloud Run
+- 가정(팀이 바꿀 수 있음): TypeScript, Express, Prisma + PostgreSQL(로컬은 docker-compose), zod(입력 검증), Luxon(시간대), Vitest(테스트), pino(로그), googleapis·google-auth-library, `@google/genai`(자연어 입력의 LLM), 배포는 Cloud Run
 - 배포 DB는 미정이다. 정해지기 전까지 DB 접근은 Prisma 계층에만 둔다.
 
 ## 명령어
@@ -39,6 +41,7 @@
 - TypeScript는 6.0을 쓴다. 7.0은 typescript-eslint가 아직 지원하지 않는다.
 - Prisma는 7.10을 쓴다. Client는 `src/generated/prisma`에 생성되고(커밋하지 않음) `../generated/prisma/client.js`에서 가져온다. DB 연결은 `@prisma/adapter-pg`, DB 주소는 `prisma.config.ts`에서 읽는다. Prisma 7의 `migrate dev`는 Client를 다시 만들지 않으므로 `npm run db:migrate`가 `prisma generate`까지 돌린다.
 - 구글 캘린더는 `googleapis` 전체 대신 `@googleapis/calendar`를 쓴다. 테스트에서는 `tests/fake-google-calendar.ts`로 바꾼다.
+- Gemini는 `@google/genai`의 interactions API(`client.interactions.create` + `response_format`, 결과는 `output_text`)로 부른다. 기본 모델은 `gemini-3.8-flash`이고 `GEMINI_MODEL`로 바꾼다. 테스트에서는 가짜 `NlpModel`로 바꾼다.
 - npm 11은 설치 스크립트를 `package.json`의 `allowScripts`에 적힌 패키지만 실행한다. prisma·esbuild 버전을 올리면 `npm install-scripts approve`로 다시 허용한다.
 
 ## 폴더 구조 (목표)
@@ -78,12 +81,12 @@ tests/
 - 반복 일정: 펼친 회차 하나를 일정 하나로 다룬다. 수정·삭제도 그 회차에만 적용한다(가정. '이후 모두'·'전체' 수정은 나중).
 - User Study는 참가자의 실제 캘린더 대신 미리 만든 시드 데이터로 진행한다. 그래서 구글 로그인 없이 쓰는 데모 사용자(`POST /v1/auth/demo`)를 둔다. 데모 사용자의 일정 생성·수정·삭제는 구글 없이 DB에만 반영한다.
 
-## 단계 (현재: Phase 1)
+## 단계 (현재: Phase 1 완료 PR #2 리뷰 중, Phase 4 자연어 해석을 먼저 진행)
 - Phase 0 저장소 뼈대: TypeScript·Express, ESLint·Prettier, Vitest, Dockerfile, docker-compose(api + postgres), Prisma, `GET /health`, `.env.example`, GitHub Actions(lint + test), README
 - Phase 1 구글 로그인 + 캘린더 기본 기능: `/v1/auth/google`, 데모 로그인 `/v1/auth/demo`(빈 데모 사용자), 토큰 암호화 저장, `/v1/calendar/sync`, 일정 조회·생성·수정·삭제(`/v1/events`), 제목 규칙과 카테고리, 일정 종류 분류(키워드 규칙)와 마감(깃발) 판정, 완료·중요 표시. PR 3개로 나눈다: A 제목 규칙·종류 분류, B 로그인, C 일정·카테고리 API
 - Phase 2 부담도 엔진 + 히트맵 API: 날짜별 점수·근거, `GET /v1/burden/days`, User Study 시드 데이터(데모 로그인의 `scenario`)
 - Phase 3 시작 설정 + 저녁 체크인 + 개인 보정
-- Phase 4 자연어 입력(규칙 기반 문장 해석) → 부담 변화 미리보기 → 일정 추가(Phase 1의 `POST /v1/events` 사용)
+- Phase 4 자연어 입력(규칙 먼저 + LLM 보조) → 부담 변화 미리보기 → 일정 추가(Phase 1의 `POST /v1/events` 사용). 해석(`/v1/nlp/parse`)은 앞당겨 만들었고, 미리보기(`/v1/events/preview`)는 부담도 엔진(Phase 2) 뒤에 만든다
 - Phase 5 과부하 경고, 재배치·휴식 제안
 - 우선순위: User Study의 핵심은 Phase 1~3이다. 시간이 모자라면 Phase 5부터 줄인다. 개발 중심 기간은 11/2~12/6이다.
 
@@ -91,7 +94,6 @@ tests/
 - 배포 DB (Cloud SQL 또는 다른 관리형 DB)
 - 생활 유형의 값 목록과 유형별 기본값
 - 활동 종류 목록과 초기 소모·충전 가중치 (`docs/burden-model.md`의 값은 가정)
-- 자연어 처리 방식: 규칙만 쓸지, 미분류 제목에만 LLM을 보조로 쓸지
 - 앱 이름
 - 일정 상세의 '공유'가 무엇인지 (휴대폰 공유 시트로 내용을 보내는 것이면 서버 작업이 없다)
 

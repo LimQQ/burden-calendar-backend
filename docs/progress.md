@@ -5,16 +5,16 @@
 작업을 마치거나 팀 결정이 생길 때마다 이 문서를 고친다. 끝난 일은 체크하고 '진행 기록'에 날짜와 함께 남긴다.
 
 ## 지금 상태
-- 단계: Phase 1 코드 완료(PR A·B·C, 데모 사용자 기준). PR #1 머지 후 차례로 올림. 실제 구글 계정 확인만 남음
+- 단계: Phase 1 코드 완료(PR #2 리뷰 중). Phase 4의 자연어 해석(`/v1/nlp/parse`)을 앞당겨 만듦(브랜치 `phase4/nlp`)
 - 코드 저장소: `C:\Users\561gu\Desktop\burden-calendar-backend`. 설계 문서(`CLAUDE.md`, `docs/`)도 여기에 둔다. GitHub는 private 저장소
-- 다음 할 일: PR #1 머지(직접) → PR A·B·C 올리기. Google Cloud OAuth 설정 후 실제 구글 계정으로 확인. 그다음 Phase 2(부담도 엔진)
+- 다음 할 일: PR #1·#2 머지(직접) → 자연어 해석 PR. Gemini API 키를 넣고 실제 해석 확인. Google Cloud OAuth 설정 후 실제 구글 계정 확인. 그다음 Phase 2(부담도 엔진)
 - 일정: 개발 중심 기간 11/2~12/6, User Study 12/7·12/9
 
 ## 해야 할 일
 
 ### Phase 0 전
 - [ ] v1 문서를 프론트 팀과 공유하고 확인받기 (`docs/api-draft.md`의 Event 형식, 화면별 API)
-- [ ] 팀에 미정 항목 묻기 (`CLAUDE.md` '미정': 배포 DB, 생활 유형, 활동 가중치, 자연어 처리 방식, 앱 이름, 공유)
+- [ ] 팀에 미정 항목 묻기 (`CLAUDE.md` '미정': 배포 DB, 생활 유형, 활동 가중치, 앱 이름, 공유)
 - [ ] 가정값 확인받기: 중요 배율 1.3, 동기화 범위 ±3개월, 반복 일정은 그 회차만 수정
 - [x] 코드 저장소 위치 정하기: 바탕화면 `burden-calendar-backend` (10/9)
 - [x] Node.js LTS(24.20.0), GitHub CLI 설치 (10/9, git은 원래 있음)
@@ -68,8 +68,11 @@ PR C 일정·카테고리 API (브랜치 `phase1/events`, PR B 위에 쌓음)
 - [ ] `POST`·`GET /v1/checkins`, α 보정
 
 ### Phase 4 자연어 입력
-- [ ] `POST /v1/nlp/parse` (규칙 기반)
-- [ ] `POST /v1/events/preview`
+- [x] `POST /v1/nlp/parse`: 규칙 파서 + LLM 어댑터(Gemini). 키가 없거나 실패하면 규칙만 (10/10, 브랜치 `phase4/nlp`)
+- [ ] Gemini API 키(`GEMINI_API_KEY`)를 `.env`에 넣고 실제 문장 20~30개로 해석 확인 (직접: [Google AI Studio](https://aistudio.google.com)에서 키 만들기)
+- [ ] User Study 동의서에 "자연어 입력 문장은 구글(Gemini)로 전송된다" 넣기
+- [ ] PR 올리고 머지
+- [ ] `POST /v1/events/preview` (부담 변화 미리보기, Phase 2 부담도 엔진 뒤)
 
 ### Phase 5 과부하 경고, 재배치·휴식 제안 (시간이 모자라면 가장 먼저 줄임)
 - [ ] `GET /v1/suggestions`
@@ -100,6 +103,9 @@ PR C 일정·카테고리 API (브랜치 `phase1/events`, PR B 위에 쌓음)
 | 10/10 | Phase 1을 PR 3개로 나눈다 (A 제목 규칙·종류 분류, B 로그인, C 일정·카테고리 API) | `CLAUDE.md` 단계 |
 | 10/10 | 데모 로그인을 Phase 1로 앞당김 (빈 데모 사용자). 시드 데이터는 Phase 2 그대로 | `CLAUDE.md` 단계, `docs/api-draft.md` |
 | 10/10 | 구글 동기화는 기본(primary) 캘린더만 | `CLAUDE.md` 구글 연동 주의 |
+| 10/10 | 자연어 처리: 규칙 먼저, 못 풀면 LLM. LLM은 어댑터로 감싸고 지금은 Gemini 무료 등급 | `CLAUDE.md` 핵심 기능 6, `docs/api-draft.md` 자연어 입력 |
+| 10/10 | 자연어 입력에서 날짜·시각을 확신할 수 없으면 비워 두고 묻는다(프로토타입처럼 오늘·23:59로 채우지 않음). 마감인데 시각만 없으면 그날 종일 마감 | `docs/api-draft.md` 자연어 입력 |
+| 10/10 | 자연어 해석을 Phase 2보다 먼저 만든다(미리보기는 Phase 2 뒤) | `CLAUDE.md` 단계 |
 | 10/10 | 시험 키워드에 '중간'을 더함 (예외 사전이 막으려던 경우가 실제로 생기게) | `docs/burden-model.md` 1절 |
 
 ## 진행 기록
@@ -112,4 +118,6 @@ PR C 일정·카테고리 API (브랜치 `phase1/events`, PR B 위에 쌓음)
 - 10/10: PR #1 머지는 자동 모드 안전장치에 막혀 직접 머지하기로 함. Phase 1 계획 승인. PR A(제목 규칙·종류 분류) 작성, 테스트 32개 통과
 - 10/10: PR B(로그인) 작성. 단위 테스트 49개, 통합 테스트 10개 통과. `npm run dev`로 데모 로그인 → `/v1/me`, 구글 설정 없을 때 503 확인. `npm audit`의 high 4건은 모두 prisma CLI(개발용) 안쪽 패키지(deepmerge-ts, 쓰지 않는 mysql2)라 그대로 둠
 - 10/10: PR C(일정·카테고리 API) 작성. 단위 테스트 70개, 통합 테스트 41개 통과. `npm run dev`로 데모 사용자의 일정 만들기·조회·동기화·카테고리 확인. Prisma 7의 `migrate dev`가 Client를 다시 만들지 않아 `db:migrate` 스크립트에 `prisma generate`를 붙임
+- 10/10: PR #2(Phase 1 전체)를 main 대상으로 엶. 시연 스크립트로 데모 로그인부터 일정·카테고리·오류 응답까지 실제 서버에서 보여 줌
+- 10/10: 자연어 해석 `POST /v1/nlp/parse` 작성(규칙 파서 + Gemini 어댑터). 단위 테스트 101개, 통합 테스트 46개 통과. 키 없이 실제 서버에서 규칙 해석 확인. 분류 키워드에 '리포트'(과제)·'회식'(약속) 추가
 - 10/10: 팀원에게 보낼 정리 문서 작성 ([부담도 캘린더 백엔드 진행 정리](https://claude.ai/code/artifact/84d9712b-7aef-4037-8f67-7e9c47de8c68): 된 것, 팀 결정, API 요약, 구글 로그인 연결, 물어볼 것, 일정). PR A·B·C 브랜치를 GitHub에 올림(PR은 #1 머지 후)

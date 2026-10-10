@@ -4,6 +4,7 @@ import request from "supertest";
 import { createApp } from "../../src/app.js";
 import { createTokenCipher } from "../../src/auth/token-cipher.js";
 import { createDb } from "../../src/db.js";
+import type { NlpModel } from "../../src/nlp/llm.js";
 import { FakeGoogleCalendar } from "../fake-google-calendar.js";
 import { fakeGoogleAuth, testDeps } from "../helpers.js";
 import { TEST_DATABASE_URL } from "./db.js";
@@ -17,7 +18,9 @@ export interface TestContext {
 }
 
 /** 가짜 구글 로그인과 가짜 구글 캘린더를 붙인 앱 */
-export function createTestContext(options: { calendarConfigured?: boolean } = {}): TestContext {
+export function createTestContext(
+  options: { calendarConfigured?: boolean; nlpModel?: NlpModel } = {},
+): TestContext {
   const google = new FakeGoogleCalendar();
   const app = createApp(
     testDeps({
@@ -25,6 +28,7 @@ export function createTestContext(options: { calendarConfigured?: boolean } = {}
       tokenCipher,
       googleAuth: fakeGoogleAuth(),
       calendarFor: options.calendarConfigured === false ? null : google.factory,
+      nlpModel: options.nlpModel ?? null,
     }),
   );
   return { app, google };

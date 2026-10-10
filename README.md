@@ -17,7 +17,7 @@ npm install
 cp .env.example .env
 npm run db:generate
 ```
-`.env`의 `JWT_SECRET`과 `TOKEN_ENC_KEY`에는 아래 명령으로 만든 값을 하나씩 넣는다. 구글 로그인을 쓰려면 `GOOGLE_CLIENT_ID`·`GOOGLE_CLIENT_SECRET`도 넣는다(비워 두면 데모 로그인만 된다).
+`.env`의 `JWT_SECRET`과 `TOKEN_ENC_KEY`에는 아래 명령으로 만든 값을 하나씩 넣는다. 구글 로그인을 쓰려면 `GOOGLE_CLIENT_ID`·`GOOGLE_CLIENT_SECRET`도 넣는다(비워 두면 데모 로그인만 된다). 자연어 입력에서 LLM(Gemini)을 쓰려면 `GEMINI_API_KEY`를 넣는다(비워 두면 규칙만으로 해석한다).
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```

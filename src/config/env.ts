@@ -22,6 +22,9 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: optionalString,
   GOOGLE_CLIENT_SECRET: optionalString,
   GOOGLE_REDIRECT_URI: optionalString,
+  // 자연어 입력의 LLM(Gemini). 키가 없으면 규칙만으로 해석한다.
+  GEMINI_API_KEY: optionalString,
+  GEMINI_MODEL: optionalString,
 });
 
 export type Env = z.infer<typeof envSchema>;

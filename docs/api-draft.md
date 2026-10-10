@@ -15,6 +15,7 @@
 - (10/10) 데모 로그인 `POST /v1/auth/demo`를 Phase 1로 당겼다. `scenario`는 Phase 2부터 받는다.
 - (10/10) '인증' 절과 오류 코드 `GOOGLE_NOT_CONFIGURED`(503)를 추가했다.
 - (10/10) 일정·카테고리 API를 만들면서 세부 규칙을 정했다: 만들기는 201, PATCH에서 null은 규칙으로 되돌리기, '동기화' 절. 지금 `pressure`는 늘 null이다(Phase 2에서 채움).
+- (10/10) 자연어 입력 `POST /v1/nlp/parse`를 만들었다. 규칙 먼저, 못 풀면 LLM(Gemini). 응답에 `date`·`startTime`·`endTime`, `assumptions`, `source`가 생기고 `missingFields` 값이 칸 이름(`title`·`date`·`startTime`·`endTime`)으로 바뀌었다.
 
 ## 공통
 - 기본 경로: `/v1`
@@ -67,7 +68,7 @@
 | 3 | PUT /v1/me/weights | `{ weights: { class: 1.0, ... } }` | 저장된 가중치 |
 | 3 | POST /v1/checkins | `{ date, level }` (1~5) | `{ date, level, predictedLevel, alpha }` |
 | 3 | GET /v1/checkins?from=&to= | - | `CheckIn[]` |
-| 4 | POST /v1/nlp/parse | `{ text }` | `{ draft: EventInput, missingFields, confidence }` |
+| 4 | POST /v1/nlp/parse | `{ text }` (300자 이하) | `{ draft, missingFields, assumptions, confidence, source }` ('자연어 입력' 참고) |
 | 4 | POST /v1/events/preview | `{ draft: EventInput }` | `{ days: [{ date, before, after }], warnings }` |
 | 5 | GET /v1/suggestions?date= | - | `[{ kind: "move" \| "rest", eventId?, to?, message }]` |
 
@@ -161,31 +162,52 @@
 ```
 - `color`는 `#RRGGBB` 형식이고 사용자가 고른다. 고르지 않으면 서버가 팔레트에서 아직 안 쓴 색을 정한다.
 
-### 자연어 파싱 예시 (Phase 4)
-오늘이 2026-10-07이고 '지능HCI' 카테고리가 이미 있을 때, 요청 `{ "text": "내일 3시 지능HCI 회의 도서관에서" }` →
+### 자연어 입력 (`POST /v1/nlp/parse`)
+해석만 하고 저장하지 않는다. 앱은 결과를 확인 카드로 보여 주고, 사용자가 빈 값을 채우거나 고친 뒤 `POST /v1/events`로 저장한다.
+
+**해석 순서**: 규칙 기반 파서가 먼저 푼다. 날짜·시작 시각·제목 중 하나라도 못 찾았을 때만 LLM(Gemini)에 묻고, 규칙이 못 찾은 칸만 채운다. 제목과 종류는 LLM 값을 쓴다. 서버에 LLM 설정이 없거나 LLM이 실패하면(시간 초과 8초 포함) 규칙 결과를 그대로 돌려준다.
+
+**확신 없는 값은 채우지 않는다**(CLAUDE.md 규칙 3). 날짜가 없으면 `date`를 비우고, 오전·오후가 둘 다 가능한 '9시'는 `startTime`을 비운다. 단 마감인데 시각만 없으면 그날 종일 마감으로 둔다(날짜는 확실하므로).
+
+오늘이 2026-10-07(수)이고 '지능HCI' 카테고리가 이미 있을 때, 요청 `{ "text": "내일 3시 지능HCI 회의 도서관에서" }` →
 ```json
 {
   "draft": {
     "category": "지능HCI",
     "title": "회의",
-    "start": "2026-10-08T15:00:00+09:00",
-    "end": null,
+    "date": "2026-10-08",
+    "startTime": "15:00",
+    "endTime": null,
     "allDay": false,
+    "start": null,
+    "end": null,
     "location": "도서관",
-    "type": "meeting"
+    "type": "meeting",
+    "isDeadline": false,
+    "prepHours": null
   },
-  "missingFields": ["end"],
-  "confidence": "medium"
+  "missingFields": ["endTime"],
+  "assumptions": ["3시 → 오후 3시로 봄"],
+  "confidence": "medium",
+  "source": "rule"
 }
 ```
-'3시'는 활동 시간 안의 시각(15시)으로 해석한다. 해석이 둘 이상 가능하면 채우지 말고 missingFields에 넣는다.
+- `date`·`startTime`·`endTime`: 확인 카드의 날짜·시각 칸에 채울 값(모르면 null). `start`·`end`는 다 정해졌을 때만 채운 `POST /v1/events` 형식이다(종일이면 날짜). 끝 시각이 시작보다 이르면 다음 날로 본다.
+- `missingFields`: 비어 있는 칸. `title`, `date`, `startTime`, `endTime` 중에서 나온다. 시각이 하나뿐인 마감(예: 시험)은 시작 = 종료라 `endTime`이 비지 않는다.
+- `assumptions`: 짐작한 것. 확인 카드에 보여 준다.
+- `confidence`: 빈 칸·짐작이 없으면 `high`, 끝 시각만 비었거나 짐작이 있으면 `medium`, 날짜·시작 시각·제목이 비면 `low`.
+- `source`: 규칙만 썼으면 `rule`, LLM이 채운 값이 있으면 `llm`.
+- 저장할 때: `category`, `title`, `start`, `end`, `allDay`, `location`을 보낸다. `isDeadline`이 true면 그대로 보낸다('까지'로 판정한 마감은 제목 규칙만으로는 다시 나오지 않는다). `type`은 사용자가 바꿨을 때만 보낸다(보내면 사용자 지정으로 고정된다).
 
 규칙 기반 파서가 처리할 범위:
-- 날짜: "10/21", "10월 21일", "오늘·내일·모레", "(다음 주) 수요일"
-- 시각: "15시", "15:00", "오후 3시", "3시 반"
+- 날짜: "2026-11-02", "10/21", "10월 21일", "오늘·내일·모레·글피", "(이번 주·다음 주·담주·다다음 주) 수요일", "수요일"(오늘과 같은 요일이면 오늘로 보고 짐작으로 남김). 반년 넘게 지난 월·일은 내년으로 본다. '다음 달 첫째 주 금요일'처럼 달 기준 표현은 규칙이 풀지 않는다(LLM 몫)
+- 시각: "15시", "15:00", "오후·저녁·밤·오전·아침·낮·새벽 3시", "3시 반", "3시 20분", 범위 "3시~5시"·"3시부터 5시까지"(끝은 앞의 오전·오후를 따름), "3시부터 2시간"
+- 오전·오후가 없는 1~12시: 활동 시간 안에 드는 쪽 하나면 그 시각으로 보고 짐작으로 남긴다. 둘 다 들거나 둘 다 안 들면 비운다
+- 종일: "종일", "하루 종일"
+- 마감: '까지'가 남아 있거나, 제목에 '마감'·'제출'이 있거나, 시험
 - 장소: "@" 뒤 또는 "~에서" 앞의 단어
-- 카테고리: `[ ]` 안의 단어, 또는 사용자가 가진 카테고리 이름과 똑같은 단어
-- 나머지 단어는 제목으로 쓰고, 제목 규칙(`[카테고리] 일정 제목`)에 맞춰 정리한다.
+- 카테고리: `[ ]` 안의 단어, 또는 사용자가 가진 카테고리 이름(긴 것부터)
+- 나머지 단어는 제목으로 쓴다(조사 '에', '에서', '까지', '부터' 등은 뺀다).
 
 ## DB 테이블 초안 (Prisma 모델 기준)
 
