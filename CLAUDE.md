@@ -28,9 +28,9 @@
 - 배포 DB는 미정이다. 정해지기 전까지 DB 접근은 Prisma 계층에만 둔다.
 
 ## 명령어
-- 처음 설정: `npm install` → `.env.example`을 `.env`로 복사 → `npm run db:generate`
+- 처음 설정: `npm install` → `.env.example`을 `.env`로 복사하고 `JWT_SECRET`·`TOKEN_ENC_KEY`를 만들어 넣기 → `npm run db:generate`
 - 개발 서버: `npm run dev` (DB가 필요하면 먼저 `docker compose up -d db`)
-- 테스트: `npm test`
+- 테스트: `npm test` (단위), `npm run test:db` (통합. 실제 PostgreSQL의 `burden_test` DB를 쓰므로 먼저 `docker compose up -d db`)
 - 린트: `npm run lint` (자동 수정은 `npm run format`), 타입 검사: `npm run typecheck`
 - DB 스키마 변경: `prisma/schema.prisma`를 고친 뒤 `npm run db:migrate` (마이그레이션 생성·적용, Client 재생성)
 - 로컬 전체 실행: `docker compose up --build` (db → migrate → api)

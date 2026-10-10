@@ -1,10 +1,34 @@
 import { createApp } from "./app.js";
+import { createGoogleAuth } from "./auth/google.js";
+import { createJwtService } from "./auth/jwt.js";
+import { createTokenCipher } from "./auth/token-cipher.js";
 import { loadEnv } from "./config/env.js";
+import { createDb } from "./db.js";
 import { createLogger } from "./logger.js";
 
 const env = loadEnv();
 const logger = createLogger(env);
-const app = createApp({ logger });
+const db = createDb(env.DATABASE_URL);
+
+const googleAuth =
+  env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+    ? createGoogleAuth({
+        clientId: env.GOOGLE_CLIENT_ID,
+        clientSecret: env.GOOGLE_CLIENT_SECRET,
+        redirectUri: env.GOOGLE_REDIRECT_URI,
+      })
+    : null;
+if (!googleAuth) {
+  logger.warn("GOOGLE_CLIENT_ID·GOOGLE_CLIENT_SECRET이 없어 구글 로그인이 꺼져 있습니다.");
+}
+
+const app = createApp({
+  logger,
+  db,
+  jwt: createJwtService(env.JWT_SECRET),
+  googleAuth,
+  tokenCipher: createTokenCipher(Buffer.from(env.TOKEN_ENC_KEY, "base64")),
+});
 
 const server = app.listen(env.PORT, () => {
   logger.info(`서버 시작: http://localhost:${env.PORT}`);
@@ -14,6 +38,8 @@ const server = app.listen(env.PORT, () => {
 for (const signal of ["SIGTERM", "SIGINT"] as const) {
   process.on(signal, () => {
     logger.info(`${signal} 받음, 서버 종료`);
-    server.close(() => process.exit(0));
+    server.close(() => {
+      void db.$disconnect().finally(() => process.exit(0));
+    });
   });
 }

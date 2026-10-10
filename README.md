@@ -17,6 +17,10 @@ npm install
 cp .env.example .env
 npm run db:generate
 ```
+`.env`의 `JWT_SECRET`과 `TOKEN_ENC_KEY`에는 아래 명령으로 만든 값을 하나씩 넣는다. 구글 로그인을 쓰려면 `GOOGLE_CLIENT_ID`·`GOOGLE_CLIENT_SECRET`도 넣는다(비워 두면 데모 로그인만 된다).
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
 
 ## 개발
 ```bash
@@ -29,7 +33,8 @@ npm run dev               # http://localhost:3000/health
 ```bash
 npm run lint        # ESLint + Prettier 검사 (자동 수정은 npm run format)
 npm run typecheck
-npm test
+npm test            # 단위 테스트
+npm run test:db     # 통합 테스트 (docker compose up -d db 먼저, burden_test DB를 따로 쓴다)
 ```
 
 ## Docker로 전체 실행

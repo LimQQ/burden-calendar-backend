@@ -30,7 +30,12 @@ services:
 
   api:
     build: .
+    # JWT_SECRET·TOKEN_ENC_KEY·GOOGLE_* 는 .env에서 읽는다. 아래 environment가 .env보다 우선한다.
+    env_file:
+      - path: .env
+        required: false
     environment:
+      NODE_ENV: production
       PORT: 3000
       LOG_LEVEL: info
       DATABASE_URL: postgresql://burden:burden@db:5432/burden?schema=public

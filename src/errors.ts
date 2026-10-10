@@ -7,6 +7,7 @@ export type ErrorCode =
   | "REAUTH_REQUIRED"
   | "NOT_FOUND"
   | "GOOGLE_API_ERROR"
+  | "GOOGLE_NOT_CONFIGURED"
   | "INTERNAL_ERROR";
 
 export class ApiError extends Error {

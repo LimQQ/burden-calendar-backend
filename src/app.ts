@@ -1,21 +1,34 @@
 import express, { type Express } from "express";
 import type { Logger } from "pino";
 import { pinoHttp } from "pino-http";
+import type { GoogleAuth } from "./auth/google.js";
+import type { JwtService } from "./auth/jwt.js";
+import type { TokenCipher } from "./auth/token-cipher.js";
+import type { Db } from "./db.js";
 import { errorHandler, notFoundHandler } from "./errors.js";
+import { authRouter } from "./routes/auth.js";
 import { healthRouter } from "./routes/health.js";
+import { meRouter } from "./routes/me.js";
 
 export interface AppDeps {
   logger: Logger;
+  db: Db;
+  jwt: JwtService;
+  /** 구글 OAuth 설정이 없으면 null (구글 로그인만 꺼진다) */
+  googleAuth: GoogleAuth | null;
+  tokenCipher: TokenCipher;
 }
 
-export function createApp({ logger }: AppDeps): Express {
+export function createApp(deps: AppDeps): Express {
   const app = express();
   app.disable("x-powered-by");
 
-  app.use(pinoHttp({ logger }));
+  app.use(pinoHttp({ logger: deps.logger }));
   app.use(express.json());
 
   app.use(healthRouter);
+  app.use("/v1/auth", authRouter(deps));
+  app.use("/v1/me", meRouter(deps));
 
   app.use(notFoundHandler);
   app.use(errorHandler);

@@ -5,9 +5,9 @@
 작업을 마치거나 팀 결정이 생길 때마다 이 문서를 고친다. 끝난 일은 체크하고 '진행 기록'에 날짜와 함께 남긴다.
 
 ## 지금 상태
-- 단계: Phase 1 진행 중. PR A(제목 규칙·종류 분류) 코드 완료, PR #1 머지 후 올림
+- 단계: Phase 1 진행 중. PR A(제목 규칙·종류 분류)·PR B(로그인) 코드 완료. PR #1 머지 후 차례로 올림
 - 코드 저장소: `C:\Users\561gu\Desktop\burden-calendar-backend`. 설계 문서(`CLAUDE.md`, `docs/`)도 여기에 둔다. GitHub는 private 저장소
-- 다음 할 일: PR #1 머지(직접) → PR A 올리기 → PR B(로그인). 그동안 Google Cloud OAuth 설정
+- 다음 할 일: PR #1 머지(직접) → PR A·B 올리기 → PR C(일정·카테고리 API). 그동안 Google Cloud OAuth 설정
 - 일정: 개발 중심 기간 11/2~12/6, User Study 12/7·12/9
 
 ## 해야 할 일
@@ -41,10 +41,13 @@ PR A 제목 규칙·종류 분류 (브랜치 `phase1/title-classify`)
 - [x] 키워드·계수를 `src/burden/params.ts`로 (10/10)
 - [ ] PR 올리고 머지
 
-PR B 로그인
-- [ ] 자체 JWT 발급·검사(7일), 인증 미들웨어
-- [ ] `POST /v1/auth/google`: idToken 검증, serverAuthCode 교환, refresh token 암호화 저장
-- [ ] `POST /v1/auth/demo` (빈 데모 사용자), `GET /v1/me`
+PR B 로그인 (브랜치 `phase1/auth`, PR A 위에 쌓음)
+- [x] 자체 JWT 발급·검사(7일), 인증 미들웨어 (10/10)
+- [x] `POST /v1/auth/google`: idToken 검증, serverAuthCode 교환, refresh token AES-256-GCM 암호화 저장 (10/10, 구글 쪽은 가짜 객체로 테스트)
+- [x] `POST /v1/auth/demo` (빈 데모 사용자), `GET /v1/me` (10/10)
+- [x] 통합 테스트(실제 PostgreSQL, `npm run test:db`)와 CI의 PostgreSQL 서비스 (10/10)
+- [ ] 실제 구글 계정으로 로그인 확인 (Google Cloud OAuth 설정과 앱의 serverAuthCode가 있어야 함)
+- [ ] PR 올리고 머지
 
 PR C 일정·카테고리 API
 - [ ] 일정 저장 방식 2가지: 구글 캘린더(실제 사용자) / DB만(데모 사용자)
@@ -104,3 +107,4 @@ PR C 일정·카테고리 API
 - 10/9: git 시작(main에 설계 문서 첫 커밋). `phase0/skeleton` 브랜치에서 Phase 0 뼈대 작성. lint·타입 검사·테스트 6개·빌드 통과, `npm run dev`로 `/health` 응답 확인. 첫 마이그레이션은 Docker가 꺼져 있어 `prisma migrate diff`로 스키마에서 만듦
 - 10/9: GitHub private 저장소 `LimQQ/burden-calendar-backend` 만들고 PR #1 올림(CI 통과). `docker compose up --build`로 db·migrate·api 실행 확인. Phase 0 완료
 - 10/10: PR #1 머지는 자동 모드 안전장치에 막혀 직접 머지하기로 함. Phase 1 계획 승인. PR A(제목 규칙·종류 분류) 작성, 테스트 32개 통과
+- 10/10: PR B(로그인) 작성. 단위 테스트 49개, 통합 테스트 10개 통과. `npm run dev`로 데모 로그인 → `/v1/me`, 구글 설정 없을 때 503 확인. `npm audit`의 high 4건은 모두 prisma CLI(개발용) 안쪽 패키지(deepmerge-ts, 쓰지 않는 mysql2)라 그대로 둠

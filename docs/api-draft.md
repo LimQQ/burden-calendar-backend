@@ -11,6 +11,10 @@
 - 오류 코드 목록과 화면별 API 표를 추가했다.
 - 리마인더 화면은 지금은 필수가 아니어서 API에 넣지 않았다.
 
+## v1 이후 바뀐 점
+- (10/10) 데모 로그인 `POST /v1/auth/demo`를 Phase 1로 당겼다. `scenario`는 Phase 2부터 받는다.
+- (10/10) '인증' 절과 오류 코드 `GOOGLE_NOT_CONFIGURED`(503)를 추가했다.
+
 ## 공통
 - 기본 경로: `/v1`
 - 인증: `Authorization: Bearer <서버 JWT>` (`/health`, `/v1/auth/*` 제외)
@@ -24,10 +28,21 @@
 |---|---|---|
 | 400 | VALIDATION_ERROR | 요청 형식이 틀림 (읽을 수 없는 JSON 포함) |
 | 401 | UNAUTHENTICATED | 서버 JWT가 없거나 만료됨 |
-| 401 | REAUTH_REQUIRED | 구글 refresh token이 만료됨 → 구글 재로그인 |
+| 401 | REAUTH_REQUIRED | 구글 refresh token이 만료됐거나 캘린더 권한이 없음 → 구글 재로그인 |
 | 404 | NOT_FOUND | 없는 일정·카테고리 |
 | 502 | GOOGLE_API_ERROR | 구글 호출 실패 (DB는 바뀌지 않음) |
+| 503 | GOOGLE_NOT_CONFIGURED | 서버에 구글 OAuth 설정이 없음 (구글 로그인만 꺼지고 데모 로그인은 됨) |
 | 500 | INTERNAL_ERROR | 처리하지 못한 서버 오류 |
+
+## 인증
+- 서버 JWT(`accessToken`)는 7일 동안 유효하다. 없거나 틀리거나 만료되면 401 `UNAUTHENTICATED`이고, 앱은 다시 로그인한다.
+- `POST /v1/auth/google`
+  - 앱은 구글 로그인에서 받은 `idToken`과 `serverAuthCode`를 보낸다. 로그인할 때 캘린더 범위 `https://www.googleapis.com/auth/calendar.events`를 함께 요청하고, `serverAuthCode`는 서버의 웹 클라이언트 ID로 받아야 한다.
+  - 401 `UNAUTHENTICATED`: idToken이나 serverAuthCode를 확인하지 못함
+  - 401 `REAUTH_REQUIRED`: 캘린더 권한이 없거나, 처음 로그인인데 refresh token이 오지 않음. 앱은 동의 화면을 다시 띄워(오프라인 접근을 강제해) 로그인한다.
+  - `needsOnboarding`: 시작 설정(profile)을 아직 하지 않았으면 true
+- `POST /v1/auth/demo`: 부를 때마다 새 데모 사용자를 만든다. 본문은 없어도 된다. 지금 `scenario`를 보내면 400 `VALIDATION_ERROR`.
+- `GET /v1/me`: `profile`은 시작 설정 전에는 null이다.
 
 ## 엔드포인트
 
