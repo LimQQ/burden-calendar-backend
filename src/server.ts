@@ -6,6 +6,7 @@ import { loadEnv } from "./config/env.js";
 import { createDb } from "./db.js";
 import { createGoogleCalendarFactory } from "./google/calendar.js";
 import { createLogger } from "./logger.js";
+import { createGeminiModel, DEFAULT_GEMINI_MODEL } from "./nlp/gemini.js";
 
 const env = loadEnv();
 const logger = createLogger(env);
@@ -28,7 +29,15 @@ const app = createApp({
     : null,
   calendarFor: googleClient ? createGoogleCalendarFactory(googleClient) : null,
   tokenCipher: createTokenCipher(Buffer.from(env.TOKEN_ENC_KEY, "base64")),
+  nlpModel: env.GEMINI_API_KEY
+    ? createGeminiModel({ apiKey: env.GEMINI_API_KEY, model: env.GEMINI_MODEL })
+    : null,
 });
+logger.info(
+  env.GEMINI_API_KEY
+    ? `자연어 입력: 규칙 + Gemini(${env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL})`
+    : "자연어 입력: 규칙만 (GEMINI_API_KEY 없음)",
+);
 
 const server = app.listen(env.PORT, () => {
   logger.info(`서버 시작: http://localhost:${env.PORT}`);

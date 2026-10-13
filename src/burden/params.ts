@@ -22,7 +22,7 @@ export const TYPE_PARAMS: Record<EventType, TypeParams> = {
     deadlinePrepHours: 10,
   },
   assignment: {
-    keywords: ["과제", "레포트", "보고서", "제출"],
+    keywords: ["과제", "레포트", "리포트", "보고서", "제출"],
     weightPerHour: 1.2,
     deadlinePrepHours: 2,
   },
@@ -37,7 +37,11 @@ export const TYPE_PARAMS: Record<EventType, TypeParams> = {
     deadlinePrepHours: null,
   },
   parttime: { keywords: ["알바", "근무", "출근"], weightPerHour: 1.4, deadlinePrepHours: null },
-  social: { keywords: ["약속", "밥", "저녁", "모임"], weightPerHour: 0.6, deadlinePrepHours: null },
+  social: {
+    keywords: ["약속", "밥", "저녁", "모임", "회식"],
+    weightPerHour: 0.6,
+    deadlinePrepHours: null,
+  },
   exercise: {
     keywords: ["운동", "헬스", "러닝", "수영"],
     weightPerHour: -0.3,

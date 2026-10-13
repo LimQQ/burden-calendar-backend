@@ -22,6 +22,7 @@ export function testDeps(overrides: Partial<AppDeps> = {}): AppDeps {
     googleAuth: null,
     calendarFor: null,
     tokenCipher: createTokenCipher(randomBytes(32)),
+    nlpModel: null,
     ...overrides,
   };
 }
