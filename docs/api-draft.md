@@ -1,5 +1,7 @@
 # API·DB 초안 v2
 
+> **이 문서는 더 이상 고치지 않는다(10/25).** 백엔드는 [riverjune/burden-calendar](https://github.com/riverjune/burden-calendar)로 합쳐졌고, 프런트가 볼 API 문서는 그 저장소의 [`docs/api.md`](https://github.com/riverjune/burden-calendar/blob/main/docs/api.md) 하나다. 아래는 합치기 전의 기록이다.
+
 프론트(하이브리드 앱) 팀과 맞추기 위한 초안이다. 프론트 팀은 이 문서를 보고 개발한다.
 v2는 팀 중간 발표 PPT 초안(10/25)을 따른 목표 형식이다. 지금 서버 코드는 v1(PostgreSQL, 5단계, 종류 10개)이고, 강유준 저장소로 옮기면서 v2로 바꾼다. 경로 앞부분(`/v1` 또는 `/api`)은 옮길 때 유준과 맞춘다.
 
