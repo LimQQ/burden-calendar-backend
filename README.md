@@ -1,5 +1,7 @@
 # 부담도 캘린더 백엔드
 
+> **이 저장소는 더 이상 개발하지 않는다(10/25).** 코드는 [riverjune/burden-calendar](https://github.com/riverjune/burden-calendar)의 `backend/`로 옮겨 합쳤다. API 문서는 그 저장소의 [`docs/api.md`](https://github.com/riverjune/burden-calendar/blob/main/docs/api.md)를 본다.
+
 경북대 지능HCI 텀프로젝트의 백엔드 서버다. 구글 캘린더 일정으로 날짜별 부담도를 계산해 하이브리드 앱에 REST API로 제공한다. 설계는 팀 중간 발표 PPT(10/25)를 따른 v2이고, 코드는 아직 v1이다(강유준 저장소로 옮기며 v2로 바꾼다).
 
 - 프로젝트 규칙: [CLAUDE.md](CLAUDE.md)
