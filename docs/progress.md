@@ -1,14 +1,14 @@
 # 진척 상황과 할 일
 
-마지막 갱신: 2026-10-10
+마지막 갱신: 2026-10-25
 
 작업을 마치거나 팀 결정이 생길 때마다 이 문서를 고친다. 끝난 일은 체크하고 '진행 기록'에 날짜와 함께 남긴다.
 
 ## 지금 상태
-- 단계: Phase 0·1 완료(PR #1·#2 머지). Phase 4의 자연어 해석(`/v1/nlp/parse`)을 앞당겨 만들어 PR로 올림(브랜치 `phase4/nlp`)
-- 코드 저장소: `C:\Users\561gu\Desktop\burden-calendar-backend`. 설계 문서(`CLAUDE.md`, `docs/`)도 여기에 둔다. GitHub는 private 저장소
-- 다음 할 일: 자연어 해석 PR 리뷰·머지. Gemini API 키를 넣고 실제 해석 확인(Flash와 Flash-Lite 비교). Google Cloud OAuth 설정 후 실제 구글 계정 확인. 그다음 Phase 2(부담도 엔진)
-- 일정: 개발 중심 기간 11/2~12/6, User Study 12/7·12/9
+- 단계: Phase 0·1 완료, Phase 4의 자연어 해석(`/v1/nlp/parse`) 완료(PR #1·#2·#3 머지). 팀 중간 발표 PPT(10/25)에 맞춰 설계 문서를 v2로 고침(7단계, 노선도, Firestore)
+- 코드 저장소: `C:\Users\561gu\Desktop\burden-calendar-backend` (GitHub `LimQQ/burden-calendar-backend`, 10/13부터 public). 강유준 저장소 `riverjune/burden-calendar`의 `backend/`로 옮겨 합치기로 함(10/25)
+- 다음 할 일: 유준 저장소 협업자 초대 받기(LimQQ). 도구 체인을 유준과 정하기. 코드를 옮기고 DB 층을 Firestore로 다시 짜기. 그다음 Phase 2(부담도 엔진 v2, 노선도)
+- 일정: 개발 중심 기간 11/2~12/6, 7일 사용 평가 11/30부터(유준 명세서 제안), 발표 12/7·12/9
 
 ## 해야 할 일
 
@@ -22,7 +22,7 @@
 - [x] GitHub CLI 로그인 (10/9, 계정 LimQQ)
 - [x] 설계 문서(`CLAUDE.md`, `docs/`)를 코드 저장소로 옮기기 (10/9)
 - [ ] Google Cloud 프로젝트와 OAuth 클라이언트 만들기 (External + Testing, 팀원을 테스트 사용자로 등록)
-- [ ] `serverAuthCode`를 받는 방법을 프론트 팀과 맞추기 (Flutter `google_sign_in` 버전)
+- [ ] `serverAuthCode`를 받는 방법을 프론트 팀과 맞추기 (하이브리드 앱: 네이티브 플러그인 또는 시스템 브라우저)
 
 ### Phase 0 저장소 뼈대
 - [x] TypeScript·Express, ESLint·Prettier, Vitest (10/9)
@@ -58,23 +58,34 @@ PR C 일정·카테고리 API (브랜치 `phase1/events`, PR B 위에 쌓음)
 - [ ] 실제 구글 캘린더로 만들기·고치기·지우기·동기화 확인 (테스트는 가짜 구글 캘린더로 함)
 - [x] PR #2로 머지 (10/10)
 
-### Phase 2 부담도 엔진 + 히트맵 API
-- [ ] 부담도 엔진 (순수 함수, `params.ts`) (점수 테스트 1~11)
-- [ ] `GET /v1/burden/days`, `GET /v1/burden/days/:date`, 규칙 점수(`model=rule`)
-- [ ] User Study 시드 데이터 (데모 로그인의 `scenario`)
+### 옮기기 (유준 저장소 `backend/`, Firestore)
+- [ ] 유준 저장소 협업자 초대 받기 (10/23에 저장소가 404, 비공개로 바뀐 듯)
+- [ ] 도구 체인 정하기 (TS 7 + 빌드 없음 + node --test 또는 TS 6 + ESLint + Vitest)
+- [ ] 구글 로그인·토큰 암호화·제목 규칙·종류 분류·자연어 해석·구글 캘린더 연동 코드 옮기기
+- [ ] DB 층을 Firestore로 다시 짜고, 통합 테스트를 Firestore 에뮬레이터로 바꾸기
+- [ ] 일정 종류를 9개로 바꾸기 (분류 테스트 C1~C7 v2)
+- [ ] 이 저장소의 `CLAUDE.md`·`docs/`를 유준 저장소 `docs/`로 옮기기
 
-### Phase 3 시작 설정 + 저녁 체크인 + 개인 보정
-- [ ] `PUT /v1/me/profile`, `PUT /v1/me/weights`
-- [ ] `POST`·`GET /v1/checkins`, α 보정
+### Phase 2 부담도 엔진 + 히트맵 API + 노선도
+- [ ] 부담도 엔진 v2 (순수 함수, `params.ts`, 7단계) (`docs/burden-model.md` 7절 점수 테스트 1~12, 레벨 표)
+- [ ] `GET /v1/burden/days`, `GET /v1/burden/days/:date` (근거 parts, 그날 처음 보여 준 레벨 저장)
+- [ ] `PATCH /v1/events/:id`의 `prepRemainingHours` (남은 준비 다시 나누기)
+- [ ] `GET /v1/route` 노선도, 카테고리·일정의 `isProject`
+- [ ] 수업 기능 비교용 시나리오 데이터 (데모 로그인의 `scenario`, 같은 일정·준비량)
+
+### Phase 3 시작 설정 + 저녁 체크인 + 개인 맞춤
+- [ ] `PUT /v1/me/profile` (생활 유형, 쉬는 날, 기상·취침, 활동별 부담), `GET /v1/me/weights`
+- [ ] `PUT /v1/checkins/:date` (7단계), `GET /v1/checkins`, 릿지 회귀 개인 맞춤
 
 ### Phase 4 자연어 입력
 - [x] `POST /v1/nlp/parse`: 규칙 파서 + LLM 어댑터(Gemini). 키가 없거나 실패하면 규칙만 (10/10, 브랜치 `phase4/nlp`)
 - [ ] Gemini API 키(`GEMINI_API_KEY`)를 `.env`에 넣고 실제 문장 20~30개로 해석 확인 (직접: [Google AI Studio](https://aistudio.google.com)에서 키 만들기)
 - [ ] User Study 동의서에 "자연어 입력 문장은 구글(Gemini)로 전송된다" 넣기
-- [ ] PR 머지 (10/10 올림)
+- [x] PR #3 머지 (10/13)
+- [ ] 명칭 정리: '미팅' → '회의' 같은 사전, 카테고리를 공백 빼고 찾기 (PPT 9번 예시 "내일 오후 6시 지능 HCI 미팅 1시간" → `[지능HCI] 회의`)
 - [ ] `POST /v1/events/preview` (부담 변화 미리보기, Phase 2 부담도 엔진 뒤)
 
-### Phase 5 과부하 경고, 재배치·휴식 제안 (시간이 모자라면 가장 먼저 줄임)
+### Phase 5 과부하 경고, 재배치·휴식 제안 (PPT에 없음. 시간이 모자라면 가장 먼저 뺌)
 - [ ] `GET /v1/suggestions`
 
 ### 나중 (지금은 필수 아님)
@@ -107,6 +118,15 @@ PR C 일정·카테고리 API (브랜치 `phase1/events`, PR B 위에 쌓음)
 | 10/10 | 자연어 입력에서 날짜·시각을 확신할 수 없으면 비워 두고 묻는다(프로토타입처럼 오늘·23:59로 채우지 않음). 마감인데 시각만 없으면 그날 종일 마감 | `docs/api-draft.md` 자연어 입력 |
 | 10/10 | 자연어 해석을 Phase 2보다 먼저 만든다(미리보기는 Phase 2 뒤) | `CLAUDE.md` 단계 |
 | 10/10 | 시험 키워드에 '중간'을 더함 (예외 사전이 막으려던 경우가 실제로 생기게) | `docs/burden-model.md` 1절 |
+| 10/13 | GitHub 저장소를 public으로 바꿈 (팀원 공유용, 커밋 기록에 비밀값 없음 확인) | - |
+| 10/25 | 팀 중간 발표 PPT 초안을 팀 전체의 결정으로 본다. 문서와 다르면 PPT를 따르고, 만든 코드를 뒤집는 것은 먼저 묻는다 | `CLAUDE.md` 첫머리 |
+| 10/25 | 부담 표시를 7단계로, 저녁 체크인도 7단계로 | `docs/burden-model.md` v2, `docs/api-draft.md` v2 |
+| 10/25 | 부담도 식은 유준 명세서의 1차식 D(d) + 중요 × 1.3. 준비 시간은 만든 날부터 마감 전날까지 똑같이 나눔(PPT 7번). 개인 맞춤은 릿지 회귀 | `docs/burden-model.md` v2 |
+| 10/25 | 프로젝트 마감 노선도 추가 (PPT 8번) | `CLAUDE.md` 핵심 기능 7, `docs/api-draft.md` 노선도 |
+| 10/25 | DB는 Firestore, 앱은 하이브리드 (PPT 부록 A2). 백엔드는 유준 저장소로 옮겨 합침 | `CLAUDE.md` 기술 스택 |
+| 10/25 | 자연어 해석은 규칙 먼저 유지. PPT 10번 'AI 항목 추출'은 'AI·규칙으로 항목 추출'로 읽음 | `CLAUDE.md` 핵심 기능 6 |
+| 10/25 | 평가: 수업 참여자 기능 비교(약 40명, 기본 / 제안) + 배포 후 7일 사용. 비교용 규칙 점수(`model=rule`)는 뺌 | `CLAUDE.md` 구글 연동 주의 |
+| 10/25 | 일정 종류를 시작 설정의 활동 목록과 같은 9개로 (class, study, exam, team, work, social, exercise, rest, other) | `docs/burden-model.md` v2 1절 |
 
 ## 진행 기록
 - 10/8 이전: 설계 문서 v0 작성 (CLAUDE.md, 부담도 모델, API·DB 초안, claude.ai 채팅에서)
@@ -122,3 +142,6 @@ PR C 일정·카테고리 API (브랜치 `phase1/events`, PR B 위에 쌓음)
 - 10/10: 자연어 해석 `POST /v1/nlp/parse` 작성(규칙 파서 + Gemini 어댑터). 단위 테스트 101개, 통합 테스트 46개 통과. 키 없이 실제 서버에서 규칙 해석 확인. 분류 키워드에 '리포트'(과제)·'회식'(약속) 추가
 - 10/10: PR #1·#2가 일반 merge로 main에 들어감. 자연어 해석을 main 대상 PR로 올림. 무료 Gemini 한도 검토: 개발·시연은 무료로 충분, User Study 이틀은 유료 등급(1천 번에 1~2달러) 권장
 - 10/10: 팀원에게 보낼 정리 문서 작성 ([부담도 캘린더 백엔드 진행 정리](https://claude.ai/code/artifact/84d9712b-7aef-4037-8f67-7e9c47de8c68): 된 것, 팀 결정, API 요약, 구글 로그인 연결, 물어볼 것, 일정). PR A·B·C 브랜치를 GitHub에 올림(PR은 #1 머지 후)
+- 10/11: 팀원 제안 「아침 브리핑과 입력 파이프라인 v0」(briefing-pipeline.md) 검토. 기존 결정과 부딪히는 곳(제목 양식, 시각 없을 때 처리, API, 색)을 정리해 질문함. 답은 아직 없음
+- 10/13: PR #3(자연어 해석) 머지. 중간 발표용 [부담도 공식과 설명](https://claude.ai/code/artifact/2e5c6fd3-3f51-442a-906d-89d109647672) 문서 작성(v1 식 기준). 강유준 「백엔드 설계 명세서」와 비교한 공유 문서(`백엔드-설계-비교와-제안.md`, 저장소에 넣지 않음)를 만듦. GitHub 저장소를 public으로 바꿈
+- 10/25: 팀 중간 발표 PPT 초안(16장) 검토. PPT를 팀 결정으로 보기로 하고, DB(Firestore로 옮기기)·체크인(7단계)·자연어(규칙 먼저 유지)를 정함. 설계 문서를 v2로 고침(`docs/burden-model.md`, `docs/api-draft.md`, `CLAUDE.md`, 이 문서). 코드는 아직 v1
